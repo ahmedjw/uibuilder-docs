@@ -2,6 +2,8 @@ import { defineConfig } from 'astro/config'
 import starlight from '@astrojs/starlight'
 
 export default defineConfig({
+  site: 'https://ahmedjw.github.io',
+  base: '/uibuilder-docs',
   integrations: [
     starlight({
       title: 'UIBuilder',
@@ -22,54 +24,27 @@ export default defineConfig({
       sidebar: [
         {
           label: 'Introduction',
-          items: [
-            { label: 'What is UIBuilder?', link: '/introduction/what-is-uibuilder/' },
-            { label: 'Use Cases', link: '/introduction/use-cases/' },
-            { label: 'Architecture', link: '/introduction/architecture/' },
-          ],
+          autogenerate: { directory: 'introduction' },
         },
         {
           label: 'Getting Started',
-          items: [
-            { label: 'Installation', link: '/getting-started/installation/' },
-            { label: 'Quick Start', link: '/getting-started/quick-start/' },
-            { label: 'Configuration', link: '/getting-started/configuration/' },
-            { label: 'CLI', link: '/getting-started/cli/' },
-          ],
+          autogenerate: { directory: 'getting-started' },
         },
         {
           label: 'Components',
-          items: [
-            { label: 'Built-in Components', link: '/components/built-in-components/' },
-            { label: 'Creating Custom Components', link: '/components/creating-custom-components/' },
-            { label: 'Zod Schemas', link: '/components/zod-schemas/' },
-            { label: 'Slots & Children', link: '/components/slots-and-children/' },
-          ],
+          autogenerate: { directory: 'components' },
         },
         {
           label: 'Editor',
-          items: [
-            { label: 'Canvas & Drag-and-Drop', link: '/editor/canvas-and-drag-and-drop/' },
-            { label: 'Properties Panel', link: '/editor/properties-panel/' },
-            { label: 'Outline Panel', link: '/editor/outline-panel/' },
-            { label: 'Preview & Export', link: '/editor/preview-and-export/' },
-            { label: 'AI Chat', link: '/editor/ai-chat/' },
-          ],
+          autogenerate: { directory: 'editor' },
         },
         {
           label: 'Examples',
-          items: [
-            { label: 'Dashboard', link: '/examples/dashboard/' },
-            { label: 'Landing Page', link: '/examples/landing-page/' },
-          ],
+          autogenerate: { directory: 'examples' },
         },
         {
           label: 'Reference',
-          items: [
-            { label: 'API Reference', link: '/reference/api-reference/' },
-            { label: 'Configuration Reference', link: '/reference/configuration-reference/' },
-            { label: 'Component API', link: '/reference/component-api/' },
-          ],
+          autogenerate: { directory: 'reference' },
         },
       ],
     }),
