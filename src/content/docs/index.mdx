@@ -1,0 +1,33 @@
+---
+title: UIBuilder
+description: A visual drag-and-drop UI builder library with extensible components
+template: splash
+hero:
+  tagline: Build visual page editors for your React apps — like Storybook, but for page building.
+  actions:
+    - text: Get Started
+      link: /getting-started/installation/
+      icon: right-arrow
+      variant: primary
+    - text: View on GitHub
+      link: https://github.com/coralstack/uibuilder
+      icon: external
+      variant: minimal
+---
+
+import { Card, CardGrid } from '@astrojs/starlight/components';
+
+<CardGrid>
+  <Card title="Drag-and-Drop Canvas" icon="pencil">
+    Build pages visually with a real-time canvas. Drag components from the sidebar, drop them onto the page, and see instant results.
+  </Card>
+  <Card title="Extensible Components" icon="puzzle">
+    Define custom components with `.catalogue.tsx` files alongside your code. Use Zod schemas for type-safe props and the editor auto-generates the properties panel.
+  </Card>
+  <Card title="16 Built-in Primitives" icon="setting">
+    Ships with essential layout, typography, action, and form components out of the box. Everything you need to build any page.
+  </Card>
+  <Card title="Export to JSON" icon="document">
+    Export your designs as flat JSON specs compatible with `@json-render/react`. Use them directly in your production app.
+  </Card>
+</CardGrid>

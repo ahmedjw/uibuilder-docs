@@ -1,0 +1,44 @@
+---
+title: Properties Panel
+description: Editing component props in the properties panel
+---
+
+The properties panel appears on the right side of the editor when a component is selected. It auto-generates form fields from the component's Zod schema.
+
+## Field Types
+
+| Zod Type | Rendered Field |
+|----------|---------------|
+| `z.string()` | Text input |
+| `z.number()` | Number input with increment/decrement |
+| `z.boolean()` | Toggle switch |
+| `z.enum([...])` | Dropdown select |
+
+## Field Labels
+
+Field labels come from two sources (in priority order):
+
+1. **`.describe()`** on the Zod field — e.g. `z.string().describe('Button text')`
+2. **Field name** — e.g. `backgroundColor` becomes "backgroundColor"
+
+## Common Props
+
+Below the component-specific fields, you'll find collapsible groups for common props:
+
+### Visual
+
+Border radius, width, color, style, opacity, and box shadow.
+
+### Sizing
+
+Width, height, min/max width, min/max height overrides.
+
+These are added automatically unless the component sets `commonProps: false`.
+
+## Style Overrides Panel
+
+At the bottom of the properties panel, the **Style Overrides** section lets you add arbitrary CSS properties as key-value pairs. These are merged into the component's inline styles.
+
+## Inline Editing
+
+Some components support **double-click to edit** directly on the canvas. For example, double-clicking a Heading or Text component enters inline editing mode, letting you type directly without using the properties panel.

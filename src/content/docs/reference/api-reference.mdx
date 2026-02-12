@@ -1,0 +1,175 @@
+---
+title: API Reference
+description: Exported functions and types from @coralstack/uibuilder
+---
+
+Everything you can import from `@coralstack/uibuilder`.
+
+## Functions
+
+### `defineComponent(options)`
+
+Creates a `ComponentDefinition` from a Zod schema and metadata. This is the primary API for registering custom components.
+
+```typescript
+import { defineComponent } from '@coralstack/uibuilder'
+
+const definition = defineComponent({
+  type: 'MyComponent',
+  label: 'My Component',
+  category: 'Content',
+  schema: mySchema,
+  defaultProps: { title: 'Hello' },
+})
+```
+
+**Parameters:**
+
+| Option | Type | Required | Default | Description |
+|--------|------|----------|---------|-------------|
+| `type` | `string` | Yes | — | Unique component type identifier |
+| `label` | `string` | Yes | — | Display name in the sidebar |
+| `category` | `string` | Yes | — | Sidebar category grouping |
+| `description` | `string` | No | — | Tooltip description |
+| `schema` | `ZodObject<T>` | Yes | — | Zod schema defining props |
+| `defaultProps` | `Record<string, unknown>` | Yes | — | Default values for new instances |
+| `allowsChildren` | `boolean` | No | `false` | Whether this is a container |
+| `layoutType` | `ContainerLayoutType` | No | — | CSS layout mode for drop zones |
+| `commonProps` | `CommonPropGroup[] \| false` | No | `['visual', 'sizing']` | Common prop groups |
+| `editorConfig` | `EditorConfig` | No | — | Resize handles and constraints |
+
+**Returns:** `ComponentDefinition`
+
+### `buildCommonStyles(props)`
+
+Converts common prop values (prefixed with `_`) into a CSS style object.
+
+```typescript
+import { buildCommonStyles } from '@coralstack/uibuilder'
+
+const styles = buildCommonStyles({
+  _borderRadius: '8px',
+  _opacity: '0.9',
+  _width: '300px',
+})
+// → { borderRadius: '8px', opacity: 0.9, width: '300px' }
+```
+
+**Parameters:** `Record<string, unknown>` — the component's full props object
+
+**Returns:** `React.CSSProperties`
+
+## Types
+
+### `UIBuilderConfig`
+
+```typescript
+interface UIBuilderConfig {
+  components: string[]
+  rootLayout?: string
+  includeBuiltins?: boolean
+  categoryOrder?: string[]
+  ai?: {
+    apiKey?: string
+    apiUrl?: string
+    model?: string
+  }
+}
+```
+
+### `ComponentDefinition`
+
+```typescript
+interface ComponentDefinition {
+  type: string
+  category: string
+  label: string
+  description?: string
+  fields: FieldSchema[]
+  defaultProps: Record<string, unknown>
+  allowsChildren: boolean
+  layoutType?: ContainerLayoutType
+  editorConfig?: EditorConfig
+}
+```
+
+### `RegisteredComponent`
+
+```typescript
+interface RegisteredComponent {
+  definition: ComponentDefinition
+  component: React.ComponentType<Record<string, unknown>>
+  schema?: unknown
+  slots?: string[]
+}
+```
+
+### `ComponentRegistry`
+
+```typescript
+type ComponentRegistry = Record<string, RegisteredComponent>
+```
+
+### `FieldSchema`
+
+```typescript
+interface FieldSchema {
+  name: string
+  label: string
+  type: FieldType
+  options?: string[]
+  defaultValue?: unknown
+  group?: string
+}
+```
+
+### `FieldType`
+
+```typescript
+type FieldType = 'string' | 'number' | 'boolean' | 'enum' | 'color' | 'json'
+```
+
+### `ContainerLayoutType`
+
+```typescript
+type ContainerLayoutType = 'block' | 'flex-row' | 'flex-column' | 'grid'
+```
+
+### `ResizeAxis`
+
+```typescript
+type ResizeAxis = 'horizontal' | 'vertical' | 'both' | 'none'
+```
+
+### `EditorConfig`
+
+```typescript
+interface EditorConfig {
+  resizeAxis?: ResizeAxis
+  minWidth?: number
+  minHeight?: number
+  maxWidth?: number
+  maxHeight?: number
+}
+```
+
+### `CommonPropGroup`
+
+```typescript
+type CommonPropGroup = 'visual' | 'sizing'
+```
+
+### `DefineComponentOptions<T>`
+
+The options parameter type for `defineComponent()`. See the function signature above.
+
+### `ComponentNode`
+
+```typescript
+interface ComponentNode {
+  id: string
+  type: string
+  props: Record<string, unknown>
+  children: ComponentNode[]
+}
+```

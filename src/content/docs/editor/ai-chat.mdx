@@ -1,0 +1,63 @@
+---
+title: AI Chat
+description: Generate component subtrees using AI
+---
+
+import { Aside } from '@astrojs/starlight/components';
+
+UIBuilder includes an AI chat panel that can generate component subtrees from natural language descriptions. It uses your registered component catalog to produce valid, insertable JSON.
+
+## Setup
+
+Configure an LLM provider in your `.uibuilder/config.ts`:
+
+```typescript
+const config: UIBuilderConfig = {
+  components: ['./components/**/*.catalogue.tsx'],
+  ai: {
+    apiKey: 'your-api-key',
+    apiUrl: 'https://generativelanguage.googleapis.com/v1beta',
+    model: 'gemini-2.0-flash',
+  },
+}
+```
+
+Or use environment variables:
+
+```bash
+# .env
+GEMINI_API_KEY=your-key-here
+```
+
+## Usage
+
+1. Open the **AI Chat** panel from the toolbar
+2. Type a description of what you want to build
+3. The AI generates a component subtree using your registered components
+4. Click **Insert** to add the generated subtree to the canvas
+
+## How It Works
+
+1. The chat sends your prompt to the configured LLM
+2. The LLM receives a **catalog** of all available components (built-in + custom) with their Zod schemas
+3. It generates a valid `@json-render` flat spec using only components from your catalog
+4. The response is streamed back and converted to UIBuilder nodes
+5. You can insert the result into the canvas at the selected position
+
+<Aside type="tip">
+The AI knows about all your custom components. If you've registered a `Chart` component with `chartType`, `values`, and `labels` props, you can ask: "Create a bar chart showing monthly sales data" and it will use the correct component and props.
+</Aside>
+
+## Supported Providers
+
+Any OpenAI-compatible or Google Generative AI endpoint works. Common options:
+
+| Provider | API URL | Model |
+|----------|---------|-------|
+| Google Gemini | `https://generativelanguage.googleapis.com/v1beta` | `gemini-2.0-flash` |
+| OpenAI | `https://api.openai.com/v1` | `gpt-4o` |
+| Local (Ollama) | `http://localhost:11434/v1` | `llama3` |
+
+<Aside type="caution">
+AI generation quality depends on the model used. More capable models produce better results with complex component compositions.
+</Aside>

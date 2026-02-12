@@ -1,0 +1,46 @@
+---
+title: Outline Panel
+description: Navigating the component tree with the outline panel
+---
+
+The outline panel shows your component tree as a collapsible hierarchy, making it easy to navigate and select deeply nested components.
+
+## Features
+
+- **Tree view** — shows parent/child relationships
+- **Click to select** — clicking a node selects it on the canvas and in the properties panel
+- **Collapse/expand** — toggle container nodes to focus on specific areas
+- **Component type icons** — each component type has a recognizable icon
+- **Visual hierarchy** — indentation shows nesting depth
+
+## Tree Structure
+
+The outline mirrors the document structure:
+
+```
+Section
+├── Heading ("Welcome")
+├── Grid (3 columns)
+│   ├── Container
+│   │   └── Text ("Feature 1")
+│   ├── Container
+│   │   └── Text ("Feature 2")
+│   └── Container
+│       └── Text ("Feature 3")
+└── Button ("Get Started")
+```
+
+## Interaction
+
+- **Single click** — selects the component (scrolls canvas to it)
+- **Expand/collapse** — click the toggle arrow next to containers
+- **Selection sync** — selecting on canvas highlights in outline, and vice versa
+
+## When to Use the Outline
+
+The outline is especially useful when:
+
+- Components overlap or are visually stacked
+- You need to select a container (instead of its children)
+- The component tree is deeply nested
+- You want to understand the page structure at a glance

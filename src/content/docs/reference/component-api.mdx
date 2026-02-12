@@ -1,0 +1,212 @@
+---
+title: Component API
+description: Props reference for all 16 built-in components
+---
+
+Complete props reference for every built-in component.
+
+## Layout
+
+### Section
+
+Full-width page section container.
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `backgroundColor` | `string` | — | CSS background color |
+| `padding` | `'none' \| 'sm' \| 'md' \| 'lg' \| 'xl'` | `'md'` | Internal padding |
+| `maxWidth` | `'full' \| '960px' \| '1200px' \| '1440px'` | `'1200px'` | Max content width |
+
+**Container:** Yes | **Layout:** `block`
+
+---
+
+### Container
+
+Generic grouping container.
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `padding` | `'none' \| 'sm' \| 'md' \| 'lg' \| 'xl'` | `'md'` | Internal padding |
+| `margin` | `'none' \| 'sm' \| 'md' \| 'lg'` | `'none'` | External margin |
+| `maxWidth` | `'full' \| '480px' \| '640px' \| '960px' \| '1200px'` | `'full'` | Max width |
+| `width` | `'100%' \| '50%' \| '75%' \| 'auto' \| '480px' \| '640px' \| '960px'` | `'100%'` | Width |
+| `minHeight` | `'auto' \| '100px' \| '200px' \| '300px' \| '400px' \| '100vh'` | `'auto'` | Min height |
+
+**Container:** Yes | **Layout:** `block`
+
+---
+
+### Grid
+
+CSS grid layout.
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `columns` | `'1'-'6' \| 'auto-fit' \| 'auto-fill'` | `'2'` | Column count |
+| `gap` | `'none' \| 'sm' \| 'md' \| 'lg' \| 'xl'` | `'md'` | Gap between items |
+| `padding` | `'none' \| 'sm' \| 'md' \| 'lg' \| 'xl'` | `'sm'` | Internal padding |
+| `minChildWidth` | `'150px' \| '200px' \| '250px' \| '300px'` | `'200px'` | Min child width (auto modes) |
+| `alignItems` | `'stretch' \| 'start' \| 'center' \| 'end'` | `'stretch'` | Vertical alignment |
+
+**Container:** Yes | **Layout:** `grid`
+
+---
+
+### Flex
+
+Flexbox container.
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `direction` | `'row' \| 'column'` | `'row'` | Flex direction |
+| `justify` | `'flex-start' \| 'center' \| 'flex-end' \| 'space-between' \| 'space-around' \| 'space-evenly'` | `'flex-start'` | Justify content |
+| `align` | `'flex-start' \| 'center' \| 'flex-end' \| 'stretch'` | `'stretch'` | Align items |
+| `gap` | `'none' \| 'sm' \| 'md' \| 'lg' \| 'xl'` | `'md'` | Gap between items |
+| `wrap` | `'nowrap' \| 'wrap'` | `'nowrap'` | Flex wrap |
+| `padding` | `'none' \| 'sm' \| 'md' \| 'lg'` | `'sm'` | Internal padding |
+
+**Container:** Yes | **Layout:** `flex-row`
+
+---
+
+### Space
+
+Empty spacing element.
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `height` | `'8px' \| '16px' \| '24px' \| '32px' \| '48px' \| '64px'` | `'16px'` | Space height |
+
+---
+
+### Divider
+
+Horizontal separator line.
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `color` | `string` | `'#e5e7eb'` | Line color |
+| `thickness` | `'1px' \| '2px' \| '3px'` | `'1px'` | Line thickness |
+| `style` | `'solid' \| 'dashed' \| 'dotted'` | `'solid'` | Line style |
+| `margin` | `'none' \| 'sm' \| 'md' \| 'lg'` | `'md'` | Vertical margin |
+
+---
+
+## Typography
+
+### Heading
+
+Heading text element.
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `text` | `string` | `'Heading'` | Heading text |
+| `level` | `'h1' \| 'h2' \| 'h3' \| 'h4' \| 'h5' \| 'h6'` | `'h2'` | Heading level |
+| `align` | `'left' \| 'center' \| 'right'` | `'left'` | Text alignment |
+| `color` | `string` | — | Text color |
+
+### Text
+
+Body text block.
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `text` | `string` | `'Text block'` | Text content |
+| `align` | `'left' \| 'center' \| 'right' \| 'justify'` | `'left'` | Alignment |
+| `fontSize` | `'sm' \| 'base' \| 'lg' \| 'xl'` | `'base'` | Font size |
+| `color` | `string` | — | Text color |
+| `fontWeight` | `'normal' \| 'medium' \| 'semibold' \| 'bold'` | `'normal'` | Font weight |
+
+### List
+
+Ordered or unordered list.
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `items` | `string` | `'Item 1\nItem 2\nItem 3'` | Items (newline-separated) |
+| `listType` | `'unordered' \| 'ordered'` | `'unordered'` | List style |
+| `fontSize` | `'sm' \| 'base' \| 'lg'` | `'base'` | Font size |
+
+---
+
+## Actions
+
+### Button
+
+Clickable button.
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `text` | `string` | `'Button'` | Button label |
+| `variant` | `'primary' \| 'secondary' \| 'ghost' \| 'outline'` | `'primary'` | Visual style |
+| `size` | `'sm' \| 'md' \| 'lg'` | `'md'` | Button size |
+| `color` | `string` | `'#3b82f6'` | Brand color |
+| `fullWidth` | `boolean` | `false` | Stretch to container width |
+
+### Link
+
+Text hyperlink.
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `text` | `string` | `'Link text'` | Link label |
+| `href` | `string` | `'#'` | URL |
+| `color` | `string` | `'#3b82f6'` | Link color |
+| `underline` | `boolean` | `true` | Show underline |
+
+### Image
+
+Image element.
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `src` | `string` | placeholder | Image URL |
+| `alt` | `string` | `'Image'` | Alt text |
+| `width` | `'auto' \| '100%' \| '50%' \| '200px' \| '300px' \| '400px'` | `'100%'` | Width |
+| `height` | `'auto' \| '200px' \| '300px' \| '400px'` | `'auto'` | Height |
+| `borderRadius` | `'none' \| 'sm' \| 'md' \| 'lg' \| 'full'` | `'none'` | Border radius |
+| `objectFit` | `'cover' \| 'contain' \| 'fill' \| 'none'` | `'cover'` | Object fit |
+
+---
+
+## Forms
+
+### Input
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `label` | `string` | `'Label'` | Field label |
+| `placeholder` | `string` | `'Enter text...'` | Placeholder |
+| `type` | `'text' \| 'email' \| 'password' \| 'number' \| 'tel' \| 'url'` | `'text'` | Input type |
+| `required` | `boolean` | `false` | Required indicator |
+
+### Checkbox
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `label` | `string` | `'Checkbox'` | Label text |
+| `checked` | `boolean` | `false` | Checked state |
+
+### Toggle
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `label` | `string` | `'Toggle'` | Label text |
+| `checked` | `boolean` | `false` | On/off state |
+
+### Select
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `label` | `string` | `'Select'` | Field label |
+| `options` | `string` | `'Option 1\nOption 2\nOption 3'` | Options (newline-separated) |
+| `placeholder` | `string` | `'Choose...'` | Placeholder text |
+
+### RadioGroup
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `label` | `string` | `'Radio Group'` | Group label |
+| `options` | `string` | `'Option 1\nOption 2\nOption 3'` | Options (newline-separated) |
+| `direction` | `'vertical' \| 'horizontal'` | `'vertical'` | Layout direction |

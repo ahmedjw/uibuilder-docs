@@ -1,0 +1,99 @@
+---
+title: Zod Schemas
+description: How Zod schemas map to editor fields
+---
+
+import { Aside } from '@astrojs/starlight/components';
+
+UIBuilder uses **Zod v4** schemas to define component props. Each Zod type automatically maps to the correct editor field in the properties panel.
+
+<Aside type="caution">
+UIBuilder requires **Zod v4**. The internal API differs significantly from v3. Make sure you have `zod@^4.0.0` installed.
+</Aside>
+
+## Type-to-Field Mapping
+
+| Zod Type | Editor Field | Example |
+|----------|-------------|---------|
+| `z.string()` | Text input | `z.string().default('Hello')` |
+| `z.number()` | Number input | `z.number().default(16)` |
+| `z.boolean()` | Toggle switch | `z.boolean().default(false)` |
+| `z.enum([...])` | Dropdown select | `z.enum(['sm', 'md', 'lg']).default('md')` |
+| `z.string().optional()` | Text input (nullable) | `z.string().optional()` |
+
+## Schema Best Practices
+
+### Always Use `.default()`
+
+Every field should have a `.default()` value. This is used when creating new component instances:
+
+```typescript
+const schema = z.object({
+  title: z.string().default('Untitled'),
+  size: z.enum(['sm', 'md', 'lg']).default('md'),
+  visible: z.boolean().default(true),
+  count: z.number().default(1),
+})
+```
+
+### Use `.describe()` for Labels
+
+The `.describe()` string becomes the field label in the properties panel:
+
+```typescript
+const schema = z.object({
+  backgroundColor: z.string().default('#ffffff').describe('Background color'),
+  padding: z.enum(['none', 'sm', 'md', 'lg']).default('md').describe('Internal padding'),
+})
+```
+
+Without `.describe()`, the field name (e.g. `backgroundColor`) is used as the label.
+
+### Enum Values for Constrained Choices
+
+Use `z.enum()` for props with a fixed set of options. The editor renders these as dropdown selects:
+
+```typescript
+const schema = z.object({
+  variant: z.enum(['primary', 'secondary', 'ghost']).default('primary').describe('Button style'),
+  size: z.enum(['sm', 'md', 'lg']).default('md').describe('Button size'),
+  align: z.enum(['left', 'center', 'right']).default('left').describe('Text alignment'),
+})
+```
+
+## Complete Example
+
+```typescript
+import { z } from 'zod'
+
+export const statCardSchema = z.object({
+  label: z.string().default('Metric').describe('Stat label'),
+  value: z.string().default('1,234').describe('Displayed value'),
+  unit: z.string().default('').describe('Unit suffix'),
+  trend: z.enum(['up', 'down', 'flat']).default('flat').describe('Trend direction'),
+  trendValue: z.string().default('').describe('Trend percentage (e.g. +12%)'),
+})
+
+export type StatCardProps = z.infer<typeof statCardSchema>
+```
+
+This generates a properties panel with:
+- Two text inputs (label, value)
+- A text input for unit
+- A dropdown for trend direction
+- A text input for trend value
+
+## Zod v4 Internals
+
+UIBuilder reads Zod schemas at runtime to generate editor fields. Key Zod v4 internals used:
+
+| Internal | Purpose |
+|----------|---------|
+| `_def.type` | String identifier: `'string'`, `'number'`, `'boolean'`, `'enum'`, `'default'`, `'optional'` |
+| `_def.innerType` | Unwraps `default()` and `optional()` wrappers |
+| `_def.defaultValue` | The default value (may be a direct value or a function) |
+| `_def.entries` | Enum entries as `Record<string, string>` (not `_def.values` like v3) |
+
+<Aside type="note">
+UIBuilder uses `_def.type` string checks instead of `instanceof` to avoid issues with multiple Zod instances. This is more robust in monorepo setups.
+</Aside>

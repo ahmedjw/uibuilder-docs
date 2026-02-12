@@ -1,0 +1,91 @@
+---
+title: Landing Page Example
+description: Build a marketing landing page with built-in components
+---
+
+import { Steps } from '@astrojs/starlight/components';
+
+This example demonstrates building a marketing landing page using only UIBuilder's built-in primitive components — no custom components needed.
+
+## Setup
+
+<Steps>
+
+1. **Install UIBuilder**
+
+   ```bash
+   npm install @coralstack/uibuilder --save-dev react react-dom zod
+   ```
+
+2. **Create minimal config**
+
+   ```typescript
+   // .uibuilder/config.ts
+   import type { UIBuilderConfig } from '@coralstack/uibuilder'
+
+   const config: UIBuilderConfig = {
+     components: [],
+   }
+
+   export default config
+   ```
+
+3. **Run**
+
+   ```bash
+   npx uibuilder
+   ```
+
+</Steps>
+
+## Building the Page
+
+With just the 16 built-in components, you can build a complete landing page:
+
+### Header
+
+1. Drag a **Flex** (direction: row, justify: space-between, align: center)
+2. Add a **Heading** (level: h3) for the logo/brand name
+3. Add another **Flex** (direction: row, gap: md) for nav links
+4. Drop **Link** components inside for navigation items
+
+### Hero Section
+
+1. Drag a **Section** (padding: xl, maxWidth: 960px)
+2. Add a **Heading** (level: h1, align: center) — "Build Amazing Products"
+3. Add **Text** (align: center) — subtitle copy
+4. Add a **Flex** (direction: row, justify: center, gap: md)
+5. Drop two **Button** components — "Get Started" (primary) and "Learn More" (secondary)
+
+### Features Grid
+
+1. Drag a **Section** (padding: lg)
+2. Add a **Grid** (columns: 3, gap: lg)
+3. Inside each grid cell, add a **Container** with:
+   - A **Heading** (level: h3) for the feature title
+   - **Text** for the feature description
+
+### Call to Action
+
+1. Drag a **Section** (padding: xl, background color)
+2. Add **Heading** (level: h2, align: center)
+3. Add **Text** (align: center)
+4. Add **Button** (centered via Flex wrapper)
+
+### Footer
+
+1. Drag a **Section** with a dark background
+2. Add a **Grid** (columns: 4) for footer columns
+3. Each column: **Heading** (h4) + multiple **Link** components
+
+## Export
+
+Once your layout looks right:
+
+1. Click **Preview** to verify the design
+2. Click **Export JSON** to get the flat spec
+3. Render in production with `@json-render/react`
+
+## Key Takeaway
+
+UIBuilder's 16 primitives (Section, Container, Grid, Flex, Heading, Text, Button, Link, Image, etc.) are sufficient to build any page layout. Custom components are for domain-specific elements like charts, data tables, or branded widgets.

@@ -1,0 +1,38 @@
+---
+title: Use Cases
+description: Common scenarios where UIBuilder excels
+---
+
+UIBuilder is designed for teams that need to build or maintain page layouts without writing code for every change. Here are the most common use cases.
+
+## Marketing Landing Pages
+
+Let marketing teams build and iterate on landing pages without developer involvement. Drag sections, headings, buttons, and images onto the canvas, configure copy and styling, and export.
+
+## Admin Dashboards
+
+Build data dashboards with custom chart, stat card, and table components. The grid and flex layout primitives handle responsive layouts, while custom `.catalogue.tsx` components bring your data visualizations.
+
+## CMS Page Templates
+
+Create reusable page templates that content teams can populate. Export the JSON spec and render it server-side or client-side with `@json-render/react`.
+
+## Design System Playgrounds
+
+Register your design system components as catalogue entries. UIBuilder becomes an interactive playground where designers and developers can compose pages using your actual production components.
+
+## Prototyping
+
+Quickly prototype page layouts before writing production code. The visual editor is faster than coding for layout exploration, and the exported JSON documents the intended structure.
+
+## Email Templates
+
+Build email-safe layouts using the built-in Section, Grid, and typography components. Export and convert to your email rendering pipeline.
+
+## When NOT to Use UIBuilder
+
+UIBuilder is a **page-level** tool. It's not ideal for:
+
+- **Component-level development** — use Storybook for that
+- **Complex application logic** — UIBuilder builds static layouts, not interactive apps
+- **Pixel-perfect design** — use Figma for high-fidelity design, then implement in code

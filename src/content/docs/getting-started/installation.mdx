@@ -1,0 +1,128 @@
+---
+title: Installation
+description: Install @coralstack/uibuilder in your project
+---
+
+import { Tabs, TabItem, Aside } from '@astrojs/starlight/components';
+
+## Install the Package
+
+Add `@coralstack/uibuilder` as a dev dependency in your project:
+
+<Tabs>
+  <TabItem label="npm">
+    ```bash
+    npm install @coralstack/uibuilder --save-dev
+    ```
+  </TabItem>
+  <TabItem label="yarn">
+    ```bash
+    yarn add -D @coralstack/uibuilder
+    ```
+  </TabItem>
+  <TabItem label="pnpm">
+    ```bash
+    pnpm add -D @coralstack/uibuilder
+    ```
+  </TabItem>
+  <TabItem label="bun">
+    ```bash
+    bun add -D @coralstack/uibuilder
+    ```
+  </TabItem>
+</Tabs>
+
+## Peer Dependencies
+
+UIBuilder requires the following peer dependencies in your project:
+
+| Package | Version |
+|---------|---------|
+| `react` | `^19.0.0` |
+| `react-dom` | `^19.0.0` |
+| `zod` | `^4.0.0` |
+
+If you don't have them already:
+
+<Tabs>
+  <TabItem label="npm">
+    ```bash
+    npm install react react-dom zod
+    ```
+  </TabItem>
+  <TabItem label="yarn">
+    ```bash
+    yarn add react react-dom zod
+    ```
+  </TabItem>
+  <TabItem label="pnpm">
+    ```bash
+    pnpm add react react-dom zod
+    ```
+  </TabItem>
+  <TabItem label="bun">
+    ```bash
+    bun add react react-dom zod
+    ```
+  </TabItem>
+</Tabs>
+
+<Aside type="caution">
+UIBuilder requires **Zod v4** (not v3). The internal API differs significantly between versions. Make sure you have `zod@^4.0.0` installed.
+</Aside>
+
+## Create Configuration
+
+Create a `.uibuilder/config.ts` file in your project root:
+
+```typescript
+// .uibuilder/config.ts
+import type { UIBuilderConfig } from '@coralstack/uibuilder'
+
+const config: UIBuilderConfig = {
+  components: ['./components/**/*.catalogue.tsx'],
+}
+
+export default config
+```
+
+## Add Script
+
+Add a convenience script to your `package.json`:
+
+```json
+{
+  "scripts": {
+    "uibuilder": "uibuilder"
+  }
+}
+```
+
+## Launch
+
+Start the editor:
+
+<Tabs>
+  <TabItem label="npm">
+    ```bash
+    npm run uibuilder
+    ```
+  </TabItem>
+  <TabItem label="yarn">
+    ```bash
+    yarn uibuilder
+    ```
+  </TabItem>
+  <TabItem label="npx">
+    ```bash
+    npx uibuilder
+    ```
+  </TabItem>
+</Tabs>
+
+The editor opens at `http://localhost:6200` with the 16 built-in components ready to use.
+
+## Next Steps
+
+- [Quick Start](/getting-started/quick-start/) — Build your first custom component
+- [Configuration](/getting-started/configuration/) — All config options explained

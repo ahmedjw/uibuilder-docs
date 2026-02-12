@@ -1,0 +1,125 @@
+---
+title: Slots & Children
+description: How container components work with child elements
+---
+
+import { Aside } from '@astrojs/starlight/components';
+
+Container components can hold child components. This is controlled by two properties in the catalogue file: `allowsChildren` in the definition and `slots` in the exports.
+
+## Making a Container Component
+
+<Steps>
+
+### 1. Set `allowsChildren: true`
+
+```tsx
+export const definition = defineComponent({
+  type: 'CardGrid',
+  label: 'Card Grid',
+  category: 'Layout',
+  schema: cardGridSchema,
+  defaultProps: { columns: '3' },
+  allowsChildren: true,       // ← enables child dropping
+  layoutType: 'grid',          // ← affects drop zone rendering
+})
+```
+
+### 2. Accept `children` in your component
+
+```tsx
+import type { ReactNode } from 'react'
+
+export function CardGrid({
+  columns = '3',
+  children,
+}: {
+  columns?: string
+  children?: ReactNode
+}) {
+  return (
+    <div style={{
+      display: 'grid',
+      gridTemplateColumns: `repeat(${columns}, 1fr)`,
+      gap: 16,
+      width: '100%',
+    }}>
+      {children}
+    </div>
+  )
+}
+```
+
+### 3. Export `slots: ['default']`
+
+```tsx
+export const slots: string[] = ['default']
+```
+
+</Steps>
+
+## Layout Types
+
+The `layoutType` tells the editor how to render drop zones for children:
+
+| Layout Type | CSS Mode | Drop Zones |
+|-------------|----------|------------|
+| `'block'` | Vertical stacking | Between each child (horizontal lines) |
+| `'flex-row'` | Horizontal flex | Between each child (vertical lines) |
+| `'flex-column'` | Vertical flex | Between each child (horizontal lines) |
+| `'grid'` | CSS Grid | Between each child + end of grid |
+
+```tsx
+// Vertical stack
+layoutType: 'block'
+
+// Horizontal row
+layoutType: 'flex-row'
+
+// CSS Grid
+layoutType: 'grid'
+```
+
+## Slots
+
+The `slots` export tells `@json-render` which named slots this component accepts. For most containers, this is `['default']`:
+
+```tsx
+// Container that accepts children
+export const slots: string[] = ['default']
+
+// Leaf component (no children)
+export const slots: string[] = []
+```
+
+<Aside type="note">
+Currently UIBuilder supports a single `'default'` slot. Named slots (header, footer, etc.) are not yet supported in the editor canvas.
+</Aside>
+
+## Nested Containers
+
+Containers can be nested arbitrarily deep:
+
+```
+Section
+  └── Grid (3 columns)
+      ├── Container
+      │   └── Heading + Text
+      ├── Container
+      │   └── Image
+      └── Container
+          └── Button
+```
+
+The editor's outline panel shows this hierarchy as a collapsible tree, making it easy to navigate complex layouts.
+
+## Built-in Containers
+
+These built-in components accept children:
+
+| Component | Layout Type |
+|-----------|-------------|
+| Section | `block` |
+| Container | `block` |
+| Grid | `grid` |
+| Flex | `flex-row` |

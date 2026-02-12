@@ -1,0 +1,137 @@
+---
+title: Configuration Reference
+description: Complete reference for .uibuilder/config.ts
+---
+
+import { Aside } from '@astrojs/starlight/components';
+
+Full reference for all options in `.uibuilder/config.ts`.
+
+## TypeScript Type
+
+```typescript
+import type { UIBuilderConfig } from '@coralstack/uibuilder'
+```
+
+## Options
+
+### `components`
+
+| | |
+|---|---|
+| **Type** | `string[]` |
+| **Required** | Yes |
+| **Description** | Glob patterns for discovering `.catalogue.tsx` files |
+
+Paths are relative to the project root. Supports all glob patterns via [tinyglobby](https://github.com/SuperchupuDev/tinyglobby).
+
+```typescript
+components: [
+  './components/**/*.catalogue.tsx',          // recursive
+  './shared/ui/*.catalogue.tsx',              // specific directory
+  './features/*/components/*.catalogue.tsx',  // nested pattern
+]
+```
+
+### `rootLayout`
+
+| | |
+|---|---|
+| **Type** | `string` |
+| **Required** | No |
+| **Default** | `'Section'` |
+| **Description** | Component type for the root element of new documents |
+
+```typescript
+rootLayout: 'DashboardGrid'
+```
+
+The root layout component is created automatically when a new document is initialized. Its default props are read from the component registry.
+
+### `includeBuiltins`
+
+| | |
+|---|---|
+| **Type** | `boolean` |
+| **Required** | No |
+| **Default** | `true` |
+| **Description** | Include UIBuilder's 16 built-in components |
+
+```typescript
+includeBuiltins: false  // Only user-defined components appear
+```
+
+When `true`, the built-in components are merged with your custom components. If a custom component has the same `type` as a built-in, the custom one takes precedence.
+
+### `categoryOrder`
+
+| | |
+|---|---|
+| **Type** | `string[]` |
+| **Required** | No |
+| **Default** | `['Layout', 'Typography', 'Actions', 'Forms']` |
+| **Description** | Display order of categories in the sidebar |
+
+```typescript
+categoryOrder: ['Layout', 'Charts', 'Data', 'Typography', 'Actions', 'Forms']
+```
+
+Categories not listed in the array are appended at the end. When `includeBuiltins` is true and no `categoryOrder` is provided, the default built-in order is used, with any new categories from custom components appended.
+
+### `ai`
+
+| | |
+|---|---|
+| **Type** | `object` |
+| **Required** | No |
+| **Description** | AI chat panel configuration |
+
+```typescript
+ai: {
+  apiKey: 'your-api-key',
+  apiUrl: 'https://generativelanguage.googleapis.com/v1beta',
+  model: 'gemini-2.0-flash',
+}
+```
+
+| Property | Type | Description |
+|----------|------|-------------|
+| `apiKey` | `string` | API key for the LLM provider |
+| `apiUrl` | `string` | API endpoint URL |
+| `model` | `string` | Model identifier |
+
+<Aside type="tip">
+API keys can be provided via environment variables in a `.env` file instead of hardcoding them in the config.
+</Aside>
+
+## Minimal Config
+
+```typescript
+import type { UIBuilderConfig } from '@coralstack/uibuilder'
+
+const config: UIBuilderConfig = {
+  components: ['./components/**/*.catalogue.tsx'],
+}
+
+export default config
+```
+
+## Full Config
+
+```typescript
+import type { UIBuilderConfig } from '@coralstack/uibuilder'
+
+const config: UIBuilderConfig = {
+  components: ['./components/**/*.catalogue.tsx', './shared/**/*.catalogue.tsx'],
+  rootLayout: 'DashboardGrid',
+  includeBuiltins: true,
+  categoryOrder: ['Layout', 'Charts', 'Data', 'Typography', 'Actions', 'Forms'],
+  ai: {
+    apiKey: process.env.GEMINI_API_KEY,
+    apiUrl: 'https://generativelanguage.googleapis.com/v1beta',
+    model: 'gemini-2.0-flash',
+  },
+}
+
+export default config
+```

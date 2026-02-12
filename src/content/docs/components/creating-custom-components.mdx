@@ -1,0 +1,136 @@
+---
+title: Creating Custom Components
+description: How to register your own components with UIBuilder
+---
+
+import { Aside, Steps } from '@astrojs/starlight/components';
+
+Custom components are registered via **catalogue files** — `.catalogue.tsx` files that live alongside your component code. UIBuilder discovers them automatically via glob patterns in your config.
+
+## File Structure
+
+Each custom component typically has three files:
+
+```
+components/
+└── my-component/
+    ├── my-component.tsx              # React component
+    ├── my-component.interface.ts     # Zod schema
+    └── my-component.catalogue.tsx    # UIBuilder registration
+```
+
+## The Catalogue File Contract
+
+Every `.catalogue.tsx` file must export exactly four named exports:
+
+```tsx
+// my-component.catalogue.tsx
+import { defineComponent } from '@coralstack/uibuilder'
+import { mySchema } from './my-component.interface'
+import { MyComponent } from './my-component'
+
+// 1. Component definition (metadata for the editor)
+export const definition = defineComponent({
+  type: 'MyComponent',          // Unique identifier
+  label: 'My Component',        // Display name in sidebar
+  category: 'Content',          // Sidebar category
+  description: 'A description', // Tooltip text
+  schema: mySchema,             // Zod schema
+  defaultProps: { ... },        // Initial prop values
+})
+
+// 2. The React component
+export const component = MyComponent as React.ComponentType<Record<string, unknown>>
+
+// 3. Raw Zod schema (for @json-render AI catalog)
+export const schema = mySchema
+
+// 4. Slot names (for @json-render)
+export const slots: string[] = []  // or ['default'] for containers
+```
+
+## `defineComponent()` Options
+
+| Option | Type | Required | Description |
+|--------|------|----------|-------------|
+| `type` | `string` | Yes | Unique component type ID |
+| `label` | `string` | Yes | Display name in the sidebar |
+| `category` | `string` | Yes | Sidebar category grouping |
+| `description` | `string` | No | Tooltip description |
+| `schema` | `ZodObject` | Yes | Zod schema defining props |
+| `defaultProps` | `Record<string, unknown>` | Yes | Default values for new instances |
+| `allowsChildren` | `boolean` | No | Whether this is a container (default: `false`) |
+| `layoutType` | `ContainerLayoutType` | No | CSS layout mode: `'block'`, `'flex-row'`, `'flex-column'`, `'grid'` |
+| `commonProps` | `CommonPropGroup[] \| false` | No | Common prop groups to include (default: `['visual', 'sizing']`) |
+| `editorConfig` | `EditorConfig` | No | Resize handles, constraints |
+
+## Container Components
+
+If your component accepts children, set `allowsChildren: true` and specify the `layoutType`:
+
+```tsx
+export const definition = defineComponent({
+  type: 'CardGrid',
+  label: 'Card Grid',
+  category: 'Layout',
+  schema: cardGridSchema,
+  defaultProps: { columns: '3', gap: 'md' },
+  allowsChildren: true,
+  layoutType: 'grid',
+})
+```
+
+Set `slots: ['default']` so `@json-render` knows this component accepts children:
+
+```tsx
+export const slots: string[] = ['default']
+```
+
+## Disabling Common Props
+
+By default, every component gets `visual` and `sizing` common props (border, opacity, width overrides, etc.). To disable:
+
+```tsx
+export const definition = defineComponent({
+  type: 'MinimalCard',
+  // ...
+  commonProps: false,
+})
+```
+
+Or include only specific groups:
+
+```tsx
+commonProps: ['visual']  // Only border/opacity, no sizing
+```
+
+## Editor Config
+
+Control resize behavior in the editor:
+
+```tsx
+export const definition = defineComponent({
+  type: 'ResizablePanel',
+  // ...
+  editorConfig: {
+    resizeAxis: 'both',    // 'horizontal' | 'vertical' | 'both' | 'none'
+    minWidth: 100,
+    minHeight: 50,
+    maxWidth: 800,
+  },
+})
+```
+
+<Aside type="tip">
+The `type` field must be unique across all components (built-in and custom). If two components share a type, the user-defined one takes precedence over built-ins.
+</Aside>
+
+## Hot Module Replacement
+
+When the UIBuilder dev server is running:
+
+- **Edit** a catalogue file → HMR updates the component
+- **Add** a new catalogue file → it appears in the sidebar automatically
+- **Delete** a catalogue file → it disappears from the sidebar
+
+No server restart needed.

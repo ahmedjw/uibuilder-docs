@@ -1,0 +1,147 @@
+---
+title: Quick Start
+description: Create your first custom component and use it in the editor
+---
+
+import { Aside, Steps } from '@astrojs/starlight/components';
+
+This guide walks you through creating a custom component and using it in the UIBuilder editor. We'll build a simple **InfoCard** component.
+
+## What We'll Build
+
+A reusable info card with a title, description, and accent color — registered as a UIBuilder component that appears in the editor sidebar.
+
+<Steps>
+
+1. **Create the component**
+
+   Create `components/info-card/info-card.tsx`:
+
+   ```tsx
+   // components/info-card/info-card.tsx
+   export function InfoCard({
+     title = 'Card Title',
+     description = 'Card description goes here.',
+     accentColor = '#3b82f6',
+   }: {
+     title?: string
+     description?: string
+     accentColor?: string
+   }) {
+     return (
+       <div style={{
+         backgroundColor: '#ffffff',
+         borderRadius: 8,
+         padding: 20,
+         borderLeft: `4px solid ${accentColor}`,
+         border: '1px solid #e5e7eb',
+         width: '100%',
+         boxSizing: 'border-box',
+       }}>
+         <h3 style={{ margin: '0 0 8px 0', fontSize: 16, fontWeight: 600 }}>
+           {title}
+         </h3>
+         <p style={{ margin: 0, fontSize: 14, color: '#6b7280' }}>
+           {description}
+         </p>
+       </div>
+     )
+   }
+   ```
+
+2. **Define the Zod schema**
+
+   Create `components/info-card/info-card.interface.ts`:
+
+   ```typescript
+   // components/info-card/info-card.interface.ts
+   import { z } from 'zod'
+
+   export const infoCardSchema = z.object({
+     title: z.string().default('Card Title').describe('Card heading'),
+     description: z.string().default('Card description goes here.').describe('Card body text'),
+     accentColor: z.string().default('#3b82f6').describe('Left border accent color'),
+   })
+
+   export type InfoCardProps = z.infer<typeof infoCardSchema>
+   ```
+
+3. **Create the catalogue file**
+
+   Create `components/info-card/info-card.catalogue.tsx`:
+
+   ```tsx
+   // components/info-card/info-card.catalogue.tsx
+   import { defineComponent } from '@coralstack/uibuilder'
+   import { infoCardSchema } from './info-card.interface'
+   import { InfoCard } from './info-card'
+
+   export const definition = defineComponent({
+     type: 'InfoCard',
+     label: 'Info Card',
+     category: 'Content',
+     description: 'A card with title, description, and accent color',
+     schema: infoCardSchema,
+     defaultProps: {
+       title: 'Card Title',
+       description: 'Card description goes here.',
+       accentColor: '#3b82f6',
+     },
+   })
+
+   export const component = InfoCard as React.ComponentType<Record<string, unknown>>
+   export const schema = infoCardSchema
+   export const slots: string[] = []
+   ```
+
+4. **Update your config**
+
+   Make sure your `.uibuilder/config.ts` discovers the catalogue file:
+
+   ```typescript
+   // .uibuilder/config.ts
+   import type { UIBuilderConfig } from '@coralstack/uibuilder'
+
+   const config: UIBuilderConfig = {
+     components: ['./components/**/*.catalogue.tsx'],
+     categoryOrder: ['Layout', 'Typography', 'Actions', 'Forms', 'Content'],
+   }
+
+   export default config
+   ```
+
+5. **Run the editor**
+
+   ```bash
+   yarn uibuilder
+   ```
+
+   Open `http://localhost:6200`. You should see your **Info Card** in the sidebar under the **Content** category alongside the 16 built-in components.
+
+</Steps>
+
+## How It Works
+
+1. The CLI loads your `.uibuilder/config.ts`
+2. It globs for `*.catalogue.tsx` files matching your patterns
+3. A Vite virtual module imports all discovered catalogue files
+4. The editor's component registry merges your components with the built-ins
+5. Your component appears in the sidebar, ready to drag onto the canvas
+
+<Aside type="tip">
+The editor watches for new `.catalogue.tsx` files. Add a new one while the server runs and it appears in the sidebar automatically — no restart needed.
+</Aside>
+
+## Key Points
+
+- Each catalogue file must export `definition`, `component`, `schema`, and `slots`
+- The `type` in `defineComponent()` must be unique across all components
+- Zod `.default()` values are used for new instances and the properties panel
+- Zod `.describe()` strings become field labels in the editor
+- `commonProps` defaults to `['visual', 'sizing']` — set to `false` to disable
+
+## Next Steps
+
+- [Configuration](/getting-started/configuration/) — All config options
+- [Creating Custom Components](/components/creating-custom-components/) — Full component authoring guide
+- [Zod Schemas](/components/zod-schemas/) — Schema-to-field mapping details

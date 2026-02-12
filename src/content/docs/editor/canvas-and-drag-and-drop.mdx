@@ -1,0 +1,70 @@
+---
+title: Canvas & Drag-and-Drop
+description: How the visual editor canvas and drag-and-drop system work
+---
+
+import { Aside } from '@astrojs/starlight/components';
+
+The canvas is the central workspace of the UIBuilder editor. It renders your component tree in real-time and provides drag-and-drop for adding and rearranging components.
+
+## Overview
+
+The canvas uses a **custom JsonRenderer** that wraps each component node with:
+
+- **Selection overlay** — click to select, blue border highlights
+- **Drop zones** — visible targets where you can drop new or moved components
+- **Resize handles** — drag to resize components that support it
+
+## Drag-and-Drop
+
+UIBuilder uses [dnd-kit v6+](https://dndkit.com/) for drag-and-drop interactions.
+
+### Adding Components
+
+1. Find a component in the **sidebar component library**
+2. Drag it from the sidebar onto the canvas
+3. Drop it onto a highlighted drop zone (between existing components or inside a container)
+
+### Rearranging Components
+
+1. Click a component on the canvas to select it
+2. Drag it to a new position
+3. Drop zones appear to show valid drop targets
+
+### Drop Zone Types
+
+| Container Layout | Drop Zone Style |
+|------------------|----------------|
+| Block / Flex-column | Horizontal lines between children |
+| Flex-row | Vertical lines between children |
+| Grid | Lines between grid items |
+
+<Aside type="tip">
+Drop zones only appear inside containers that have `allowsChildren: true`. Leaf components cannot accept children.
+</Aside>
+
+## Selection
+
+- **Click** a component to select it
+- **Selected** component shows a blue border and appears in the properties panel
+- **Click canvas background** to deselect
+- **Delete/Backspace** removes the selected component
+
+## Keyboard Shortcuts
+
+| Shortcut | Action |
+|----------|--------|
+| `Ctrl/Cmd + Z` | Undo |
+| `Ctrl/Cmd + Shift + Z` | Redo |
+| `Ctrl/Cmd + C` | Copy selected |
+| `Ctrl/Cmd + V` | Paste |
+| `Ctrl/Cmd + X` | Cut selected |
+| `Delete` / `Backspace` | Delete selected |
+
+## Resize Handles
+
+Components with `editorConfig.resizeAxis` set show resize handles when selected. Drag the handles to adjust width and/or height.
+
+## Error Boundaries
+
+The canvas wraps component rendering in an error boundary. If a component throws during render, it displays an error message instead of crashing the entire editor.

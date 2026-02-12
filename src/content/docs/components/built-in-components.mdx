@@ -1,0 +1,136 @@
+---
+title: Built-in Components
+description: The 16 primitive components included with UIBuilder
+---
+
+import { Aside } from '@astrojs/starlight/components';
+
+UIBuilder ships with 16 essential primitive components — the building blocks you need to construct any page layout. These are always available unless you set `includeBuiltins: false` in your config.
+
+## Layout
+
+Components for structuring page layout.
+
+| Component | Type | Description | Children |
+|-----------|------|-------------|----------|
+| **Section** | `Section` | Full-width page section with configurable padding and max-width | Yes |
+| **Container** | `Container` | Generic container for grouping components (width: 100%) | Yes |
+| **Grid** | `Grid` | CSS grid layout with configurable columns and gap | Yes |
+| **Flex** | `Flex` | Flexbox container for row/column arrangements | Yes |
+| **Space** | `Space` | Empty spacing element with configurable height | No |
+| **Divider** | `Divider` | Horizontal line separator with customizable style | No |
+
+### Section
+
+The primary full-width container. Typically used as the root component or for major page sections.
+
+```typescript
+{
+  backgroundColor: string,  // CSS color value
+  padding: 'none' | 'sm' | 'md' | 'lg' | 'xl',
+  maxWidth: 'full' | '960px' | '1200px' | '1440px',
+}
+```
+
+### Container
+
+A generic box for grouping child components. Defaults to `width: 100%` to fill its parent.
+
+```typescript
+{
+  padding: 'none' | 'sm' | 'md' | 'lg' | 'xl',
+  margin: 'none' | 'sm' | 'md' | 'lg',
+  maxWidth: 'full' | '480px' | '640px' | '960px' | '1200px',
+  width: '100%' | '50%' | '75%' | 'auto' | '480px' | '640px' | '960px',
+  minHeight: 'auto' | '100px' | '200px' | '300px' | '400px' | '100vh',
+}
+```
+
+### Grid
+
+Multi-column CSS grid layout. Supports fixed column counts and responsive auto-fit/auto-fill.
+
+```typescript
+{
+  columns: '1' | '2' | '3' | '4' | '5' | '6' | 'auto-fit' | 'auto-fill',
+  gap: 'none' | 'sm' | 'md' | 'lg' | 'xl',
+  padding: 'none' | 'sm' | 'md' | 'lg' | 'xl',
+  minChildWidth: '150px' | '200px' | '250px' | '300px',
+  alignItems: 'stretch' | 'start' | 'center' | 'end',
+}
+```
+
+### Flex
+
+Flexible container for arranging children in rows or columns.
+
+```typescript
+{
+  direction: 'row' | 'column',
+  justify: 'flex-start' | 'center' | 'flex-end' | 'space-between' | 'space-around' | 'space-evenly',
+  align: 'flex-start' | 'center' | 'flex-end' | 'stretch',
+  gap: 'none' | 'sm' | 'md' | 'lg' | 'xl',
+  wrap: 'nowrap' | 'wrap',
+  padding: 'none' | 'sm' | 'md' | 'lg',
+}
+```
+
+<Aside type="note">
+All layout components have `width: 100%` by default and use `box-sizing: border-box` so they fill their parent container correctly.
+</Aside>
+
+## Typography
+
+Components for text content.
+
+| Component | Type | Description |
+|-----------|------|-------------|
+| **Heading** | `Heading` | Heading text (h1–h6) with configurable level and alignment |
+| **Text** | `Text` | Block of body text with rich formatting options |
+| **List** | `List` | Ordered or unordered list with configurable items |
+
+## Actions
+
+Interactive and media components.
+
+| Component | Type | Description |
+|-----------|------|-------------|
+| **Button** | `Button` | Clickable button with variant, size, and color options |
+| **Link** | `Link` | Text hyperlink with configurable URL and styling |
+| **Image** | `Image` | Image element with src, alt, sizing, and border radius |
+
+## Forms
+
+Form input components.
+
+| Component | Type | Description |
+|-----------|------|-------------|
+| **Input** | `Input` | Text input field with label, placeholder, and type |
+| **Checkbox** | `Checkbox` | Checkbox with label |
+| **Toggle** | `Toggle` | Toggle switch with label |
+| **Select** | `Select` | Dropdown select field with configurable options |
+| **RadioGroup** | `RadioGroup` | Group of radio buttons |
+
+## Common Props
+
+All components (unless `commonProps: false`) automatically receive these additional props:
+
+### Visual Group
+
+- `_borderRadius` — Border radius value
+- `_borderWidth` — Border width
+- `_borderColor` — Border color
+- `_borderStyle` — Border style (solid, dashed, dotted, none)
+- `_opacity` — Element opacity (0–1)
+- `_shadow` — Box shadow preset
+
+### Sizing Group
+
+- `_width` — CSS width override
+- `_height` — CSS height override
+- `_minWidth` — Minimum width
+- `_minHeight` — Minimum height
+- `_maxWidth` — Maximum width
+- `_maxHeight` — Maximum height
+
+These are rendered by the `buildCommonStyles()` utility into inline CSS.

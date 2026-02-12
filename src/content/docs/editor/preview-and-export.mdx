@@ -1,0 +1,76 @@
+---
+title: Preview & Export
+description: Preview your design and export it as JSON
+---
+
+import { Aside } from '@astrojs/starlight/components';
+
+UIBuilder lets you preview your design as it will appear in production and export it as a flat JSON specification.
+
+## Preview Mode
+
+Click the **Preview** button in the toolbar to toggle preview mode. This switches from the editor canvas to the production renderer powered by `@json-render/react`.
+
+In preview mode:
+- No selection borders, drop zones, or resize handles
+- Components render exactly as they will in production
+- The preview overlay covers the full canvas area
+
+## Export Format
+
+UIBuilder exports a **flat JSON spec** compatible with `@json-render/react`:
+
+```json
+{
+  "root": "node_1",
+  "elements": {
+    "node_1": {
+      "type": "Section",
+      "props": {
+        "padding": "md",
+        "maxWidth": "1200px"
+      },
+      "children": ["node_2", "node_3"]
+    },
+    "node_2": {
+      "type": "Heading",
+      "props": {
+        "text": "Welcome",
+        "level": "h1",
+        "align": "center"
+      }
+    },
+    "node_3": {
+      "type": "Button",
+      "props": {
+        "text": "Get Started",
+        "variant": "primary"
+      }
+    }
+  }
+}
+```
+
+### Key Points
+
+- **Flat structure** — all elements are at the top level of `elements`, referenced by ID
+- **Children as string arrays** — parent nodes list child IDs, not nested objects
+- **`root`** — the ID of the top-level element
+- **Clean props** — editor-only props (like `_nodeId`) are stripped at export
+- **Style conversion** — `_style` overrides are converted to `style`
+
+<Aside type="note">
+The flat spec format is designed for `@json-render/react`. You can render it in production with:
+```tsx
+import { Renderer } from '@json-render/react'
+<Renderer spec={exportedJson} registry={yourRegistry} />
+```
+</Aside>
+
+## Export Actions
+
+The toolbar provides:
+
+- **Copy JSON** — copies the spec to clipboard
+- **Download JSON** — saves as a `.json` file
+- **Preview** — toggle the live preview overlay

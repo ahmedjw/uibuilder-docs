@@ -1,0 +1,46 @@
+---
+title: What is UIBuilder?
+description: Overview of the @coralstack/uibuilder library
+---
+
+**UIBuilder** is a visual drag-and-drop page editor that you install as a dev dependency in your React project — just like Storybook. It lets you (and your team) build pages by dragging components onto a canvas, configuring their props, and exporting the result as JSON.
+
+## The Problem
+
+Building page editors from scratch is hard:
+
+- Drag-and-drop, selection, resize, undo/redo — all complex UI interactions
+- Properties panels need to be generated from component schemas
+- Preview and export require a rendering pipeline
+- Every team ends up rebuilding the same editor scaffolding
+
+## The Solution
+
+UIBuilder gives you a complete, production-ready page editor out of the box:
+
+```bash
+npm install @coralstack/uibuilder --save-dev
+npx uibuilder
+```
+
+That's it. Your editor is running with 16 built-in components ready to use.
+
+## How It Works
+
+1. **Install** the library as a dev dependency
+2. **Define** your custom components with `.catalogue.tsx` files
+3. **Configure** via `.uibuilder/config.ts`
+4. **Run** `npx uibuilder` to launch the editor
+5. **Export** your designs as JSON for production use
+
+## Key Features
+
+- **Drag-and-drop canvas** with real-time rendering
+- **Properties panel** auto-generated from Zod schemas
+- **Outline tree** for navigating complex component hierarchies
+- **Undo/redo** with full history
+- **Preview mode** powered by `@json-render/react`
+- **AI chat** for generating component subtrees
+- **16 built-in primitives** — layout, typography, actions, and forms
+- **Extensible** — add any React component via `.catalogue.tsx` files
+- **Export** to flat JSON spec format

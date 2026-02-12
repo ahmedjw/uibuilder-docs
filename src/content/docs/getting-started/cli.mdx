@@ -1,0 +1,101 @@
+---
+title: CLI
+description: UIBuilder command-line interface reference
+---
+
+import { Aside } from '@astrojs/starlight/components';
+
+The `uibuilder` CLI starts the visual editor as a Vite dev server.
+
+## Usage
+
+```bash
+npx uibuilder
+```
+
+Or via a package.json script:
+
+```json
+{
+  "scripts": {
+    "uibuilder": "uibuilder"
+  }
+}
+```
+
+## What Happens
+
+When you run `uibuilder`, the CLI:
+
+1. **Resolves** the project root (current working directory)
+2. **Loads** `.uibuilder/config.ts` using [jiti](https://github.com/unjs/jiti) (TypeScript execution without a build step)
+3. **Discovers** catalogue files matching your glob patterns
+4. **Starts** a Vite dev server with:
+   - The editor UI as the application root
+   - A virtual module plugin that generates the component registry
+   - The AI streaming plugin (if AI config is provided)
+5. **Opens** the browser at `http://localhost:6200`
+
+## Console Output
+
+```
+[uibuilder] Loading config from /your/project/.uibuilder/config.ts
+[uibuilder] Starting editor...
+[uibuilder] Project root: /your/project
+[uibuilder] Editor root:  /path/to/node_modules/@coralstack/uibuilder
+[uibuilder] Discovered 4 catalogue file(s)
+
+  VITE v7.x.x  ready in 800 ms
+
+  ➜  Local:   http://localhost:6200/
+
+[uibuilder] Ready!
+```
+
+## Default Port
+
+The editor starts on port **6200**. If that port is in use, Vite automatically picks the next available port.
+
+## File Watching
+
+The CLI watches for changes to `.catalogue.tsx` files:
+
+- **New file added** → appears in the sidebar automatically
+- **File removed** → disappears from the sidebar
+- **File modified** → HMR updates the component in place
+
+<Aside type="tip">
+You don't need to restart the server when adding or removing catalogue files. The virtual module plugin detects changes and triggers a hot reload.
+</Aside>
+
+## Environment Variables
+
+The CLI loads `.env` files from your project root via Vite's built-in env support. This is useful for AI API keys:
+
+```bash
+# .env
+GEMINI_API_KEY=your-key-here
+```
+
+## Troubleshooting
+
+### Config not found
+
+```
+[uibuilder] No config found at /your/project/.uibuilder/config.ts
+Create a .uibuilder/config.ts file in your project root.
+```
+
+Make sure you have a `.uibuilder/config.ts` file in the directory where you run the command.
+
+### No catalogue files discovered
+
+```
+[uibuilder] Discovered 0 catalogue file(s)
+```
+
+Check that your `components` glob patterns in the config match your file paths. Patterns are relative to the project root.
+
+### Port already in use
+
+Vite will automatically try the next port. Check the console output for the actual URL.

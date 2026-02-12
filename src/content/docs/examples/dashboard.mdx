@@ -1,0 +1,113 @@
+---
+title: Dashboard Example
+description: Build a data dashboard with custom chart components
+---
+
+import { Aside, Steps } from '@astrojs/starlight/components';
+
+This example shows how to build a Grafana-style dashboard with custom chart, stat card, and text components alongside UIBuilder's built-in primitives.
+
+## Project Structure
+
+```
+examples/dashboard/
+├── package.json
+├── tsconfig.json
+├── .uibuilder/
+│   └── config.ts
+└── components/
+    ├── dashboard-grid/
+    │   ├── dashboard-grid.tsx
+    │   ├── dashboard-grid.interface.ts
+    │   └── dashboard-grid.catalogue.tsx
+    ├── chart/
+    │   ├── chart.tsx
+    │   ├── chart.interface.ts
+    │   └── chart.catalogue.tsx
+    ├── stat-card/
+    │   ├── stat-card.tsx
+    │   ├── stat-card.interface.ts
+    │   └── stat-card.catalogue.tsx
+    └── text-cell/
+        ├── text-cell.tsx
+        ├── text-cell.interface.ts
+        └── text-cell.catalogue.tsx
+```
+
+## Configuration
+
+```typescript
+// .uibuilder/config.ts
+import type { UIBuilderConfig } from '@coralstack/uibuilder'
+
+const config: UIBuilderConfig = {
+  components: ['./components/**/*.catalogue.tsx'],
+  rootLayout: 'DashboardGrid',
+  categoryOrder: ['Layout', 'Charts', 'Data', 'Typography', 'Actions', 'Forms'],
+}
+
+export default config
+```
+
+## Custom Components
+
+### DashboardGrid (Root Layout)
+
+A CSS grid container used as the root layout. Configurable columns and gap.
+
+```tsx
+export function DashboardGrid({ columns = 12, gap = 'md', children }) {
+  return (
+    <div style={{
+      display: 'grid',
+      gridTemplateColumns: `repeat(${columns}, 1fr)`,
+      gap: GAP_MAP[gap],
+      padding: GAP_MAP[gap],
+      minHeight: '100vh',
+      backgroundColor: '#f9fafb',
+    }}>
+      {children}
+    </div>
+  )
+}
+```
+
+### Chart (CSS-Only)
+
+Supports bar, donut (conic-gradient), and sparkline (SVG) chart types — no external charting dependency needed.
+
+```typescript
+const chartSchema = z.object({
+  title: z.string().default('Chart'),
+  chartType: z.enum(['bar', 'donut', 'sparkline']).default('bar'),
+  values: z.string().default('[65, 40, 85, 30, 55]'),
+  labels: z.string().default('["Mon", "Tue", "Wed", "Thu", "Fri"]'),
+  color: z.string().default('#3b82f6'),
+  height: z.number().default(200),
+})
+```
+
+### StatCard
+
+Big metric number with label and trend indicator.
+
+### TextCell
+
+Simple text display with variant (heading, body, caption) and alignment.
+
+## Running
+
+```bash
+cd examples/dashboard
+yarn uibuilder
+```
+
+The editor opens with:
+- **DashboardGrid** as the root element
+- All 4 dashboard components in the sidebar under Charts/Data categories
+- All 16 built-in components also available
+- Drag charts and stat cards onto the grid to build your dashboard
+
+<Aside type="tip">
+The dashboard components use CSS-only charts (no external dependencies). Bar charts use flexbox heights, donut charts use `conic-gradient`, and sparklines use inline SVG.
+</Aside>

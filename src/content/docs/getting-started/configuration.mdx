@@ -1,0 +1,124 @@
+---
+title: Configuration
+description: Configure UIBuilder via .uibuilder/config.ts
+---
+
+import { Aside } from '@astrojs/starlight/components';
+
+UIBuilder is configured via a `.uibuilder/config.ts` file in your project root.
+
+## Basic Configuration
+
+```typescript
+// .uibuilder/config.ts
+import type { UIBuilderConfig } from '@coralstack/uibuilder'
+
+const config: UIBuilderConfig = {
+  components: ['./components/**/*.catalogue.tsx'],
+}
+
+export default config
+```
+
+## Full Configuration
+
+```typescript
+// .uibuilder/config.ts
+import type { UIBuilderConfig } from '@coralstack/uibuilder'
+
+const config: UIBuilderConfig = {
+  // Glob patterns to discover catalogue files (relative to project root)
+  components: ['./components/**/*.catalogue.tsx'],
+
+  // Root layout component type (defaults to 'Section')
+  rootLayout: 'DashboardGrid',
+
+  // Whether to include the 16 built-in components (defaults to true)
+  includeBuiltins: true,
+
+  // Category display order in the sidebar
+  categoryOrder: ['Layout', 'Charts', 'Data', 'Typography', 'Actions', 'Forms'],
+
+  // AI generation configuration
+  ai: {
+    apiKey: 'your-api-key',
+    apiUrl: 'https://generativelanguage.googleapis.com/v1beta',
+    model: 'gemini-2.0-flash',
+  },
+}
+
+export default config
+```
+
+## Options Reference
+
+### `components`
+
+**Type:** `string[]` — **Required**
+
+Glob patterns for discovering `.catalogue.tsx` files. Paths are relative to the project root.
+
+```typescript
+components: [
+  './components/**/*.catalogue.tsx',
+  './shared/**/*.catalogue.tsx',
+]
+```
+
+### `rootLayout`
+
+**Type:** `string` — **Optional** (default: `'Section'`)
+
+The component type used as the root element when creating a new document. Must match a `type` from a registered component.
+
+```typescript
+rootLayout: 'DashboardGrid'
+```
+
+### `includeBuiltins`
+
+**Type:** `boolean` — **Optional** (default: `true`)
+
+Whether to include UIBuilder's 16 built-in primitive components. Set to `false` if you want only your own components.
+
+```typescript
+includeBuiltins: false // Only user-defined components
+```
+
+### `categoryOrder`
+
+**Type:** `string[]` — **Optional**
+
+Controls the display order of categories in the sidebar. Categories not listed are appended at the end.
+
+```typescript
+categoryOrder: ['Layout', 'Charts', 'Data', 'Typography', 'Actions', 'Forms']
+```
+
+<Aside type="note">
+When `includeBuiltins` is true and no `categoryOrder` is provided, the default order is: `Layout`, `Typography`, `Actions`, `Forms`. Any categories from your custom components are appended automatically.
+</Aside>
+
+### `ai`
+
+**Type:** `object` — **Optional**
+
+Configuration for the AI chat panel's LLM integration.
+
+| Property | Type | Description |
+|----------|------|-------------|
+| `apiKey` | `string` | API key for the LLM provider |
+| `apiUrl` | `string` | API endpoint URL |
+| `model` | `string` | Model identifier (e.g. `'gemini-2.0-flash'`) |
+
+```typescript
+ai: {
+  apiKey: process.env.GEMINI_API_KEY,
+  apiUrl: 'https://generativelanguage.googleapis.com/v1beta',
+  model: 'gemini-2.0-flash',
+}
+```
+
+<Aside type="tip">
+You can also set AI configuration via environment variables in a `.env` file in your project root. The CLI loads `.env` automatically.
+</Aside>

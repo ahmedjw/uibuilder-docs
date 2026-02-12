@@ -1,0 +1,113 @@
+---
+title: Architecture
+description: How UIBuilder is structured internally
+---
+
+import { Aside } from '@astrojs/starlight/components';
+
+UIBuilder is a single Vite-powered application that runs as a dev server. Understanding its architecture helps when building custom components or extending the editor.
+
+## High-Level Overview
+
+```
+┌──────────────────────────────────────────────┐
+│                  CLI (bin.ts)                 │
+│  Loads config → Starts Vite dev server       │
+├──────────────────────────────────────────────┤
+│             Vite Dev Server                   │
+│  ┌─────────────┐  ┌──────────────────────┐   │
+│  │ React Plugin │  │ Catalogue Discovery  │   │
+│  └─────────────┘  │ Plugin (virtual       │   │
+│                    │ modules)              │   │
+│                    └──────────────────────┘   │
+├──────────────────────────────────────────────┤
+│              Editor Application               │
+│  ┌──────────┐ ┌──────────┐ ┌─────────────┐  │
+│  │  Canvas   │ │Properties│ │   Outline    │  │
+│  │ (DnD Kit) │ │  Panel   │ │    Panel     │  │
+│  └──────────┘ └──────────┘ └─────────────┘  │
+│  ┌──────────────────────────────────────┐    │
+│  │         Zustand Store (immer)         │    │
+│  │  nodes, selection, undo/redo, etc.    │    │
+│  └──────────────────────────────────────┘    │
+├──────────────────────────────────────────────┤
+│           Component Registry                  │
+│  Built-in (16) + User catalogue files         │
+└──────────────────────────────────────────────┘
+```
+
+## Core Layers
+
+### 1. CLI & Vite Dev Server
+
+When you run `npx uibuilder`, the CLI:
+
+1. Loads your `.uibuilder/config.ts` via [jiti](https://github.com/unjs/jiti)
+2. Discovers `.catalogue.tsx` files via glob patterns using [tinyglobby](https://github.com/SuperchupuDev/tinyglobby)
+3. Starts a Vite dev server with the editor as its root
+4. Injects a **virtual module plugin** that generates the component registry on-the-fly
+
+### 2. Component Registry
+
+The registry is a map of component type names to their definitions:
+
+```typescript
+{
+  Section: { definition, component, schema, slots },
+  Button:  { definition, component, schema, slots },
+  // ... your custom components too
+}
+```
+
+In standalone dev mode, this is a static import. In CLI mode, it's a **Vite virtual module** that merges built-in components with your catalogue files.
+
+### 3. Zustand Store
+
+All editor state lives in a single Zustand store with immer middleware:
+
+- **Document tree** — nested component nodes with props
+- **Selection** — currently selected node ID
+- **Undo/redo** — snapshot-based history
+- **Clipboard** — cut/copy/paste operations
+
+### 4. Dual Renderer
+
+UIBuilder uses two rendering systems:
+
+| Renderer | Purpose | Technology |
+|----------|---------|------------|
+| **JsonRenderer** | Editor canvas | Custom renderer with DnD Kit integration, selection overlays, resize handles |
+| **@json-render/react** | Preview & export | Production renderer, reads the flat JSON spec format |
+
+<Aside type="note">
+The editor canvas renderer adds selection borders, drop zones, and resize handles around each component. The preview renderer shows components exactly as they'll appear in production.
+</Aside>
+
+## Data Flow
+
+```
+User drags component from sidebar
+  → Store: addNode(parentId, type, props)
+    → Immer produces new state
+      → Canvas re-renders via Zustand subscription
+        → JsonRenderer maps nodes to React components
+```
+
+## File Structure
+
+```
+packages/uibuilder/
+├── cli/
+│   ├── bin.ts                    # CLI entry point
+│   └── vite-catalogue-plugin.ts  # Virtual module generation
+├── server/
+│   └── ai-stream-plugin.ts      # AI chat Vite plugin
+├── src/
+│   ├── components/
+│   │   ├── catalogue/            # 16 built-in components
+│   │   └── editor/               # Editor UI (canvas, panels, toolbar)
+│   ├── core/                     # Utilities, schema conversion, export
+│   ├── store/                    # Zustand editor store
+│   └── types/                    # TypeScript types
+└── index.html                    # Editor app entry
+```
