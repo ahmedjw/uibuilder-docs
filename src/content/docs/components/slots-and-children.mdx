@@ -11,50 +11,50 @@ Container components can hold child components. This is controlled by two proper
 
 <Steps>
 
-### 1. Set `allowsChildren: true`
+1. Set `allowsChildren: true`
 
-```tsx
-export const definition = defineComponent({
-  type: 'CardGrid',
-  label: 'Card Grid',
-  category: 'Layout',
-  schema: cardGridSchema,
-  defaultProps: { columns: '3' },
-  allowsChildren: true,       // ← enables child dropping
-  layoutType: 'grid',          // ← affects drop zone rendering
-})
-```
+   ```tsx
+   export const definition = defineComponent({
+     type: 'CardGrid',
+     label: 'Card Grid',
+     category: 'Layout',
+     schema: cardGridSchema,
+     defaultProps: { columns: '3' },
+     allowsChildren: true,       // ← enables child dropping
+     layoutType: 'grid',          // ← affects drop zone rendering
+   })
+   ```
 
-### 2. Accept `children` in your component
+2. Accept `children` in your component
 
-```tsx
-import type { ReactNode } from 'react'
+   ```tsx
+   import type { ReactNode } from 'react'
 
-export function CardGrid({
-  columns = '3',
-  children,
-}: {
-  columns?: string
-  children?: ReactNode
-}) {
-  return (
-    <div style={{
-      display: 'grid',
-      gridTemplateColumns: `repeat(${columns}, 1fr)`,
-      gap: 16,
-      width: '100%',
-    }}>
-      {children}
-    </div>
-  )
-}
-```
+   export function CardGrid({
+     columns = '3',
+     children,
+   }: {
+     columns?: string
+     children?: ReactNode
+   }) {
+     return (
+       <div style={{
+         display: 'grid',
+         gridTemplateColumns: `repeat(${columns}, 1fr)`,
+         gap: 16,
+         width: '100%',
+       }}>
+         {children}
+       </div>
+     )
+   }
+   ```
 
-### 3. Export `slots: ['default']`
+3. Export `slots: ['default']`
 
-```tsx
-export const slots: string[] = ['default']
-```
+   ```tsx
+   export const slots: string[] = ['default']
+   ```
 
 </Steps>
 
