@@ -2,8 +2,7 @@ import { defineConfig } from 'astro/config'
 import starlight from '@astrojs/starlight'
 
 export default defineConfig({
-  site: 'https://ahmedjw.github.io',
-  base: '/uibuilder-docs',
+  site: 'https://uibuilder-docs.vercel.app',
   integrations: [
     starlight({
       title: 'UIBuilder',
