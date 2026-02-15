@@ -15,6 +15,7 @@ In preview mode:
 - No selection borders, drop zones, or resize handles
 - Components render exactly as they will in production
 - The preview overlay covers the full canvas area
+- [Data bindings](/editor/data-binding/) (`$path` expressions) are resolved against the page state via `@json-render/react`'s production renderer
 
 ## Export Format
 
@@ -58,13 +59,18 @@ UIBuilder exports a **flat JSON spec** compatible with `@json-render/react`:
 - **`root`** — the ID of the top-level element
 - **Clean props** — editor-only props (like `_nodeId`) are stripped at export
 - **Style conversion** — `_style` overrides are converted to `style`
+- **`state`** — when [page state](/editor/data-binding/) is defined, it is included in the spec as `state` and `$path` expressions are preserved in props
 
 <Aside type="note">
 The flat spec format is designed for `@json-render/react`. You can render it in production with:
 ```tsx
-import { Renderer } from '@json-render/react'
-<Renderer spec={exportedJson} registry={yourRegistry} />
+import { Renderer, JSONUIProvider } from '@json-render/react'
+
+<JSONUIProvider registry={yourRegistry} initialState={exportedJson.state}>
+  <Renderer spec={exportedJson} registry={yourRegistry} />
+</JSONUIProvider>
 ```
+When `state` is present, wrap the renderer in `JSONUIProvider` so `$path` expressions resolve correctly. See [Data Binding](/editor/data-binding/) for details.
 </Aside>
 
 ## Export Actions

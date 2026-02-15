@@ -1,0 +1,187 @@
+---
+title: Data Binding
+description: Connect component props to a shared page state using $path expressions
+sidebar:
+  order: 4
+---
+
+import { Aside, Steps, Tabs, TabItem } from '@astrojs/starlight/components';
+
+UIBuilder supports **data binding** — connecting component props to a shared page state model using `$path` expressions. This lets you design pages with dynamic, data-driven content instead of only static values.
+
+## How It Works
+
+Data binding uses JSON Pointer paths to reference values in a page-level state model:
+
+```
+Page State                    Component Props
+┌─────────────────────┐       ┌──────────────────────────────┐
+│ {                   │       │ title: { "$path": "/user/name" }
+│   "user": {         │ ───▶  │ → resolves to "Jane Doe"     │
+│     "name": "Jane"  │       │                              │
+│   }                 │       │ count: { "$path": "/metrics/total" }
+│   "metrics": {      │ ───▶  │ → resolves to 42             │
+│     "total": 42     │       │                              │
+│   }                 │       └──────────────────────────────┘
+│ }                   │
+└─────────────────────┘
+```
+
+A `$path` expression is a plain object with a single key:
+
+```json
+{ "$path": "/user/name" }
+```
+
+The path follows [JSON Pointer](https://datatracker.ietf.org/doc/html/rfc6901) syntax — segments separated by `/`, starting from the root of the state model.
+
+## Quick Start
+
+<Steps>
+
+1. **Define page state** — Open the **Page State** panel in the right sidebar (below the properties panel). Enter sample data as JSON:
+
+   ```json
+   {
+     "user": {
+       "name": "Jane Doe",
+       "role": "Admin"
+     },
+     "metrics": {
+       "revenue": 12500,
+       "users": 342
+     }
+   }
+   ```
+
+   Click **Apply** to save the state.
+
+2. **Bind a prop** — Select a component on the canvas (e.g. a Heading). In the properties panel, click the **link icon** next to any field label to switch it to binding mode.
+
+3. **Pick a path** — A `$path` input appears with a dropdown of available state paths. Select a path (e.g. `/user/name`) or type one manually.
+
+4. **See the result** — The canvas updates immediately to show the resolved value. The Heading now displays "Jane Doe" instead of its default text.
+
+</Steps>
+
+## Page State Panel
+
+The **Page State** panel is a collapsible section below the properties panel in the right sidebar. It provides a JSON textarea where you define sample data for your page.
+
+- **Apply button** — Changes are applied explicitly (not on every keystroke) to avoid parse errors while typing
+- **Validation** — Invalid JSON shows an error message below the textarea
+- **Badge** — Shows the number of top-level keys when state is defined
+- **Undo/redo** — State changes integrate with the editor's undo/redo system
+
+<Aside type="tip">
+The state model is included in the exported JSON spec as `state`, making it available at runtime via `@json-render/react`'s `JSONUIProvider`.
+</Aside>
+
+## Binding Toggle
+
+Each field in the properties panel shows a small **link icon** when page state is defined. Clicking it toggles between:
+
+| Mode | Behavior |
+|------|----------|
+| **Static** (default) | Normal input — you type a literal value |
+| **Bound** (link active) | Path input — the prop value is a `$path` expression resolved from state |
+
+When bound, the input shows:
+- A `$path` prefix label
+- A text input for the path (e.g. `/user/name`)
+- An autocomplete dropdown listing all available leaf paths in the state
+- A preview of the resolved value below the input
+
+Click the link icon again to switch back to static mode. The prop reverts to the field's default value.
+
+<Aside type="note">
+Grid layout props (Column Span, Row Span, Grid Column, Grid Row) do not show the binding toggle — these are internal editor props that should not be data-bound.
+</Aside>
+
+## Path Format
+
+Paths use JSON Pointer syntax:
+
+| Path | Resolves to |
+|------|-------------|
+| `/user/name` | `"Jane Doe"` |
+| `/user/role` | `"Admin"` |
+| `/metrics/revenue` | `12500` |
+| `/items/0` | First element of an array |
+
+Paths must point to **leaf values** (strings, numbers, booleans, or arrays). Pointing to an intermediate object (e.g. `/user`) will stringify the object for display.
+
+## Design-Time Resolution
+
+On the editor canvas, `$path` bindings are resolved in real-time against the page state. This means:
+
+- Changing the state and clicking Apply immediately updates all bound components
+- Components display actual data values, not placeholder expressions
+- The resolution is read-only — components cannot write back to state in the editor
+
+## Preview & Export
+
+### Preview
+
+The preview overlay passes the page state as `initialState` to `@json-render/react`'s `JSONUIProvider`. This means `$path` expressions are resolved by the production renderer, giving you an accurate preview of how the page will look with real data.
+
+### Export
+
+When exporting the page spec, `$path` expressions are preserved as-is in the component props, and the state model is included in the spec:
+
+```json
+{
+  "root": "node_1",
+  "elements": {
+    "node_1": {
+      "type": "Section",
+      "children": ["node_2"]
+    },
+    "node_2": {
+      "type": "Heading",
+      "props": {
+        "text": { "$path": "/user/name" },
+        "level": "h1"
+      }
+    }
+  },
+  "state": {
+    "user": {
+      "name": "Jane Doe",
+      "role": "Admin"
+    }
+  }
+}
+```
+
+At runtime, render the spec with:
+
+```tsx
+import { Renderer, JSONUIProvider } from '@json-render/react'
+
+<JSONUIProvider registry={registry} initialState={spec.state}>
+  <Renderer spec={spec} registry={registry} />
+</JSONUIProvider>
+```
+
+## Utility Functions
+
+UIBuilder exports utility functions for working with `$path` expressions programmatically:
+
+```typescript
+import {
+  isPathExpression,
+  createPathExpression,
+  resolveBindingValue,
+  enumerateStatePaths,
+} from '@coralstack/uibuilder'
+```
+
+| Function | Description |
+|----------|-------------|
+| `isPathExpression(value)` | Returns `true` if the value is a `{ $path: string }` object |
+| `createPathExpression(path)` | Creates a `{ $path: "/..." }` object |
+| `resolveBindingValue(value, state)` | Resolves a single value against a state model |
+| `enumerateStatePaths(state)` | Lists all leaf paths with type and preview info |
+
+See the [API Reference](/reference/api-reference/) for full type signatures.

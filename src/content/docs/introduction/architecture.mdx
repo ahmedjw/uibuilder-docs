@@ -68,6 +68,7 @@ In standalone dev mode, this is a static import. In CLI mode, it's a **Vite virt
 All editor state lives in a single Zustand store with immer middleware:
 
 - **Document tree** — nested component nodes with props
+- **Page state** — optional state model for [data binding](/editor/data-binding/) (`$path` expressions)
 - **Selection** — currently selected node ID
 - **Undo/redo** — snapshot-based history
 - **Clipboard** — cut/copy/paste operations
@@ -78,8 +79,8 @@ UIBuilder uses two rendering systems:
 
 | Renderer | Purpose | Technology |
 |----------|---------|------------|
-| **JsonRenderer** | Editor canvas | Custom renderer with DnD Kit integration, selection overlays, resize handles |
-| **@json-render/react** | Preview & export | Production renderer, reads the flat JSON spec format |
+| **JsonRenderer** | Editor canvas | Custom renderer with DnD Kit integration, selection overlays, resize handles. Resolves `$path` bindings for design-time preview. |
+| **@json-render/react** | Preview & export | Production renderer, reads the flat JSON spec format. Resolves `$path` bindings via `JSONUIProvider`. |
 
 <Aside type="note">
 The editor canvas renderer adds selection borders, drop zones, and resize handles around each component. The preview renderer shows components exactly as they'll appear in production.

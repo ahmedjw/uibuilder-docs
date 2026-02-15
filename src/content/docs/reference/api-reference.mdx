@@ -59,7 +59,100 @@ const styles = buildCommonStyles({
 
 **Returns:** `React.CSSProperties`
 
+### `isPathExpression(value)`
+
+Checks whether a value is a `$path` binding expression.
+
+```typescript
+import { isPathExpression } from '@coralstack/uibuilder'
+
+isPathExpression({ $path: '/user/name' }) // true
+isPathExpression('hello')                 // false
+isPathExpression({ foo: 'bar' })          // false
+```
+
+**Parameters:** `value: unknown`
+
+**Returns:** `boolean`
+
+### `createPathExpression(path)`
+
+Creates a `$path` binding expression object.
+
+```typescript
+import { createPathExpression } from '@coralstack/uibuilder'
+
+const binding = createPathExpression('/user/name')
+// → { $path: '/user/name' }
+```
+
+**Parameters:** `path: string` — JSON Pointer path (e.g. `"/user/name"`)
+
+**Returns:** `PathExpression`
+
+### `resolveBindingValue(value, stateModel)`
+
+Resolves a single value against a state model. If the value is a `$path` expression, looks up the path in state. Otherwise returns the value as-is.
+
+```typescript
+import { resolveBindingValue } from '@coralstack/uibuilder'
+
+const state = { user: { name: 'Jane' } }
+resolveBindingValue({ $path: '/user/name' }, state) // 'Jane'
+resolveBindingValue('static text', state)            // 'static text'
+```
+
+**Parameters:**
+- `value: unknown` — The value to resolve (may be a `$path` expression or a literal)
+- `stateModel: Record<string, unknown>` — The page state model
+
+**Returns:** `unknown` — The resolved value, or `undefined` if the path doesn't exist
+
+### `enumerateStatePaths(obj, prefix?)`
+
+Lists all leaf paths in a state model for use in path picker UIs.
+
+```typescript
+import { enumerateStatePaths } from '@coralstack/uibuilder'
+
+const state = { user: { name: 'Jane', age: 30 }, items: [1, 2] }
+const paths = enumerateStatePaths(state)
+// [
+//   { path: '/user/name', type: 'string', preview: '"Jane"' },
+//   { path: '/user/age', type: 'number', preview: '30' },
+//   { path: '/items', type: 'array', preview: 'Array(2)' },
+// ]
+```
+
+**Parameters:**
+- `obj: unknown` — The state model object
+- `prefix?: string` — Path prefix for recursion (default `""`)
+
+**Returns:** `StatePathEntry[]`
+
 ## Types
+
+### `PathExpression`
+
+```typescript
+interface PathExpression {
+  /** JSON Pointer path into the state model (e.g. "/user/name"). */
+  $path: string
+}
+```
+
+### `StatePathEntry`
+
+```typescript
+interface StatePathEntry {
+  /** JSON Pointer path (e.g. "/user/name"). */
+  path: string
+  /** The JS typeof the leaf value. */
+  type: string
+  /** A short preview of the value (truncated for display). */
+  preview: string
+}
+```
 
 ### `UIBuilderConfig`
 
@@ -171,5 +264,18 @@ interface ComponentNode {
   type: string
   props: Record<string, unknown>
   children: ComponentNode[]
+}
+```
+
+### `PageDocument`
+
+```typescript
+interface PageDocument {
+  /** The root component node of the page tree. */
+  root: ComponentNode
+  /** Page-level metadata (title, timestamps, etc.). */
+  metadata: PageMetadata
+  /** Page-level state model for $path data bindings. */
+  state?: Record<string, unknown>
 }
 ```
