@@ -33,20 +33,20 @@ components: [
 ]
 ```
 
-### `rootLayout`
+### `rootComponent`
 
 | | |
 |---|---|
 | **Type** | `string` |
 | **Required** | No |
-| **Default** | `'Section'` |
+| **Default** | `'_Root'` |
 | **Description** | Component type for the root element of new documents |
 
 ```typescript
-rootLayout: 'DashboardGrid'
+rootComponent: 'PageLayout'
 ```
 
-The root layout component is created automatically when a new document is initialized. Its default props are read from the component registry.
+The root component is created automatically when a new document is initialized. Must be a registered component with `allowsChildren: true`.
 
 ### `includeBuiltins`
 
@@ -54,14 +54,27 @@ The root layout component is created automatically when a new document is initia
 |---|---|
 | **Type** | `boolean` |
 | **Required** | No |
-| **Default** | `true` |
+| **Default** | `false` |
 | **Description** | Include UIBuilder's 16 built-in components |
 
 ```typescript
-includeBuiltins: false  // Only user-defined components appear
+includeBuiltins: true  // Built-in + user components
 ```
 
 When `true`, the built-in components are merged with your custom components. If a custom component has the same `type` as a built-in, the custom one takes precedence.
+
+### `gridColumns`
+
+| | |
+|---|---|
+| **Type** | `number` |
+| **Required** | No |
+| **Default** | `12` |
+| **Description** | Number of columns for the root grid layout |
+
+```typescript
+gridColumns: 6
+```
 
 ### `categoryOrder`
 
@@ -77,6 +90,93 @@ categoryOrder: ['Layout', 'Charts', 'Data', 'Typography', 'Actions', 'Forms']
 ```
 
 Categories not listed in the array are appended at the end. When `includeBuiltins` is true and no `categoryOrder` is provided, the default built-in order is used, with any new categories from custom components appended.
+
+### `alias`
+
+| | |
+|---|---|
+| **Type** | `Record<string, string>` |
+| **Required** | No |
+| **Description** | Path aliases for Vite module resolution |
+
+```typescript
+alias: {
+  '@/': './',
+  '@components/': './components/',
+}
+```
+
+Values are resolved relative to the project root.
+
+### `css`
+
+| | |
+|---|---|
+| **Type** | `string[]` |
+| **Required** | No |
+| **Description** | CSS files to inject into the editor |
+
+```typescript
+css: ['./app.css', './theme.css']
+```
+
+Loaded before component rendering. Useful for Tailwind CSS, theme files, or design tokens.
+
+### `initialState`
+
+| | |
+|---|---|
+| **Type** | `Record<string, unknown>` |
+| **Required** | No |
+| **Description** | Initial page state model for data binding |
+
+```typescript
+initialState: {
+  user: { name: 'Jane Doe', role: 'Admin' },
+  metrics: { revenue: 48500, visitors: 1200 },
+}
+```
+
+Provides default data for [data binding](/editor/data-binding/) expressions. Supports HMR — editing the config file hot-reloads the state without restarting the server.
+
+### `jsonRender`
+
+| | |
+|---|---|
+| **Type** | `object` |
+| **Required** | No |
+| **Description** | Custom `@json-render` catalog and registry modules |
+
+```typescript
+jsonRender: {
+  catalog: { path: './lib/render/catalog.ts', exportName: 'myCatalog' },
+  registry: { path: './lib/render/registry.tsx', exportName: 'myRegistry' },
+}
+```
+
+When specified, the Vite plugin imports from your modules instead of auto-generating adapters from the component registry.
+
+### `typography`
+
+| | |
+|---|---|
+| **Type** | `object` |
+| **Required** | No |
+| **Description** | Global typography settings for the canvas |
+
+```typescript
+typography: {
+  fontFamily: 'Inter, sans-serif',
+  baseFontSize: 16,
+  lineHeight: 1.5,
+}
+```
+
+| Property | Type | Description |
+|----------|------|-------------|
+| `fontFamily` | `string` | CSS font-family value |
+| `baseFontSize` | `number` | Base font size in pixels |
+| `lineHeight` | `number` | Default line height (unitless ratio) |
 
 ### `ai`
 
@@ -104,6 +204,72 @@ ai: {
 API keys can be provided via environment variables in a `.env` file instead of hardcoding them in the config.
 </Aside>
 
+### `quickPrompts`
+
+| | |
+|---|---|
+| **Type** | `Array<{ label: string; prompt: string }>` |
+| **Required** | No |
+| **Description** | Custom AI chat quick prompt suggestions |
+
+```typescript
+quickPrompts: [
+  { label: 'Hero section', prompt: 'Create a hero section with headline and CTA' },
+  { label: 'Pricing table', prompt: 'Create a 3-tier pricing comparison' },
+]
+```
+
+### `spacingScale`
+
+| | |
+|---|---|
+| **Type** | `number[]` |
+| **Required** | No |
+| **Description** | Design token spacing scale in pixels |
+
+```typescript
+spacingScale: [0, 4, 8, 12, 16, 24, 32, 48, 64]
+```
+
+### `historyDepth`
+
+| | |
+|---|---|
+| **Type** | `number` |
+| **Required** | No |
+| **Default** | `50` |
+| **Description** | Maximum undo/redo history entries |
+
+```typescript
+historyDepth: 100
+```
+
+### `port`
+
+| | |
+|---|---|
+| **Type** | `number` |
+| **Required** | No |
+| **Default** | `6200` |
+| **Description** | Dev server port |
+
+```typescript
+port: 3000
+```
+
+### `outDir`
+
+| | |
+|---|---|
+| **Type** | `string` |
+| **Required** | No |
+| **Default** | `'dist'` |
+| **Description** | Output directory for `uibuilder build` |
+
+```typescript
+outDir: 'build'
+```
+
 ## Minimal Config
 
 ```typescript
@@ -123,14 +289,33 @@ import type { UIBuilderConfig } from '@coralstack/uibuilder'
 
 const config: UIBuilderConfig = {
   components: ['./components/**/*.catalogue.tsx', './shared/**/*.catalogue.tsx'],
-  rootLayout: 'DashboardGrid',
+  rootComponent: 'PageLayout',
   includeBuiltins: true,
+  gridColumns: 12,
   categoryOrder: ['Layout', 'Charts', 'Data', 'Typography', 'Actions', 'Forms'],
+  alias: { '@/': './' },
+  css: ['./app.css'],
+  initialState: {
+    user: { name: 'Jane', role: 'Admin' },
+    metrics: { revenue: 48500 },
+  },
+  typography: {
+    fontFamily: 'Inter, sans-serif',
+    baseFontSize: 16,
+    lineHeight: 1.5,
+  },
+  spacingScale: [0, 4, 8, 12, 16, 24, 32, 48, 64],
+  historyDepth: 100,
+  port: 6200,
+  outDir: 'dist',
   ai: {
     apiKey: process.env.GEMINI_API_KEY,
     apiUrl: 'https://generativelanguage.googleapis.com/v1beta',
     model: 'gemini-2.0-flash',
   },
+  quickPrompts: [
+    { label: 'Hero section', prompt: 'Create a hero section with headline and CTA' },
+  ],
 }
 
 export default config

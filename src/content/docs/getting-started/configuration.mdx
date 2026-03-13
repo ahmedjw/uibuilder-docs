@@ -32,14 +32,36 @@ const config: UIBuilderConfig = {
   // Glob patterns to discover catalogue files (relative to project root)
   components: ['./components/**/*.catalogue.tsx'],
 
-  // Root layout component type (defaults to 'Section')
-  rootLayout: 'DashboardGrid',
+  // Root component type (defaults to built-in '_Root')
+  rootComponent: 'PageLayout',
 
-  // Whether to include the 16 built-in components (defaults to true)
+  // Whether to include the 16 built-in components (defaults to false)
   includeBuiltins: true,
+
+  // Number of columns for the root grid layout (defaults to 12)
+  gridColumns: 12,
 
   // Category display order in the sidebar
   categoryOrder: ['Layout', 'Charts', 'Data', 'Typography', 'Actions', 'Forms'],
+
+  // Path aliases for Vite module resolution
+  alias: { '@/': './' },
+
+  // CSS files to inject into the editor
+  css: ['./app.css'],
+
+  // Initial page state for data binding
+  initialState: {
+    user: { name: 'Jane', role: 'Admin' },
+    metrics: { visitors: 1200, revenue: 48500 },
+  },
+
+  // Typography settings for the canvas
+  typography: {
+    fontFamily: 'Inter, sans-serif',
+    baseFontSize: 16,
+    lineHeight: 1.5,
+  },
 
   // AI generation configuration
   ai: {
@@ -67,24 +89,34 @@ components: [
 ]
 ```
 
-### `rootLayout`
+### `rootComponent`
 
-**Type:** `string` — **Optional** (default: `'Section'`)
+**Type:** `string` — **Optional** (default: `'_Root'`)
 
-The component type used as the root element when creating a new document. Must match a `type` from a registered component.
+The component type used as the root element when creating a new document. Must match a `type` from a registered component that has `allowsChildren: true`.
 
 ```typescript
-rootLayout: 'DashboardGrid'
+rootComponent: 'PageLayout'
 ```
 
 ### `includeBuiltins`
 
-**Type:** `boolean` — **Optional** (default: `true`)
+**Type:** `boolean` — **Optional** (default: `false`)
 
-Whether to include UIBuilder's 16 built-in primitive components. Set to `false` if you want only your own components.
+Whether to include UIBuilder's 16 built-in primitive components alongside your custom components. Set to `true` if you want the built-in layout, typography, action, and form components.
 
 ```typescript
-includeBuiltins: false // Only user-defined components
+includeBuiltins: true // Include built-in components
+```
+
+### `gridColumns`
+
+**Type:** `number` — **Optional** (default: `12`)
+
+Number of columns for the root grid layout.
+
+```typescript
+gridColumns: 6
 ```
 
 ### `categoryOrder`
@@ -100,6 +132,96 @@ categoryOrder: ['Layout', 'Charts', 'Data', 'Typography', 'Actions', 'Forms']
 <Aside type="note">
 When `includeBuiltins` is true and no `categoryOrder` is provided, the default order is: `Layout`, `Typography`, `Actions`, `Forms`. Any categories from your custom components are appended automatically.
 </Aside>
+
+### `alias`
+
+**Type:** `Record<string, string>` — **Optional**
+
+Path aliases for Vite module resolution. Values are resolved relative to the project root.
+
+```typescript
+alias: {
+  '@/': './',
+  '@components/': './components/',
+}
+```
+
+### `css`
+
+**Type:** `string[]` — **Optional**
+
+CSS files to inject into the editor, loaded before component rendering. Paths are relative to the project root. Useful for Tailwind CSS, theme stylesheets, or design tokens.
+
+```typescript
+css: ['./app.css', './theme.css']
+```
+
+### `initialState`
+
+**Type:** `Record<string, unknown>` — **Optional**
+
+Initial page state model for new pages. Provides sample/default data for [data binding](/editor/data-binding/) expressions (`$path`, `$cond`, `$each`, etc.). Components can reference these values via binding expressions in their props.
+
+```typescript
+initialState: {
+  user: { name: 'Jane Doe', role: 'Admin' },
+  metrics: { revenue: 48500, visitors: 1200 },
+  features: [
+    { icon: '⚡', title: 'Fast', description: 'Blazing speed' },
+    { icon: '🎨', title: 'Beautiful', description: 'Stunning design' },
+  ],
+}
+```
+
+When `initialState` is defined:
+- New documents are created with this state pre-populated
+- Components can bind to state paths immediately (e.g. `{ "$path": "/user/name" }`)
+- The state is visible in the **Page State** panel in the right sidebar
+- Changes to `initialState` in the config file **hot-reload** without restarting the server
+
+<Aside type="tip">
+`initialState` is especially useful with `@json-render/react` — the state feeds directly into `JSONUIProvider` for preview and production rendering.
+</Aside>
+
+### `jsonRender`
+
+**Type:** `object` — **Optional**
+
+Paths to user-provided `@json-render` catalog and registry modules. When specified, the Vite plugin generates virtual modules that import from these files instead of the auto-generated adapters.
+
+```typescript
+jsonRender: {
+  catalog: { path: './lib/render/catalog.ts', exportName: 'myCatalog' },
+  registry: { path: './lib/render/registry.tsx', exportName: 'myRegistry' },
+}
+```
+
+| Property | Type | Description |
+|----------|------|-------------|
+| `catalog.path` | `string` | Path to your `@json-render` catalog module |
+| `catalog.exportName` | `string` | Named export to import from the module |
+| `registry.path` | `string` | Path to your `@json-render` registry module |
+| `registry.exportName` | `string` | Named export to import from the module |
+
+### `typography`
+
+**Type:** `object` — **Optional**
+
+Global typography settings applied to the canvas viewport.
+
+```typescript
+typography: {
+  fontFamily: 'Inter, sans-serif',
+  baseFontSize: 16,
+  lineHeight: 1.5,
+}
+```
+
+| Property | Type | Description |
+|----------|------|-------------|
+| `fontFamily` | `string` | CSS font-family value |
+| `baseFontSize` | `number` | Base font size in pixels |
+| `lineHeight` | `number` | Default line height (unitless ratio) |
 
 ### `ai`
 
@@ -124,3 +246,56 @@ ai: {
 <Aside type="tip">
 You can also set AI configuration via environment variables in a `.env` file in your project root. The CLI loads `.env` automatically.
 </Aside>
+
+### `quickPrompts`
+
+**Type:** `Array<{ label: string; prompt: string }>` — **Optional**
+
+Custom quick prompt suggestions displayed in the AI chat panel when the conversation is empty.
+
+```typescript
+quickPrompts: [
+  { label: 'Hero section', prompt: 'Create a hero section with headline and CTA' },
+  { label: 'Pricing table', prompt: 'Create a 3-tier pricing comparison' },
+]
+```
+
+### `spacingScale`
+
+**Type:** `number[]` — **Optional**
+
+Design token spacing scale in pixels. Used to populate quick-pick options in margin/padding inputs.
+
+```typescript
+spacingScale: [0, 4, 8, 12, 16, 24, 32, 48, 64]
+```
+
+### `historyDepth`
+
+**Type:** `number` — **Optional** (default: `50`)
+
+Maximum number of undo/redo history entries to retain. Lower values reduce memory usage.
+
+```typescript
+historyDepth: 100
+```
+
+### `port`
+
+**Type:** `number` — **Optional** (default: `6200`)
+
+Dev server port for `uibuilder dev`.
+
+```typescript
+port: 3000
+```
+
+### `outDir`
+
+**Type:** `string` — **Optional** (default: `'dist'`)
+
+Output directory for `uibuilder build`. Relative to project root.
+
+```typescript
+outDir: 'build'
+```
