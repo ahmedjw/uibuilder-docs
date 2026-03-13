@@ -42,12 +42,35 @@ import type { UIBuilderConfig } from '@coralstack/uibuilder'
 
 const config: UIBuilderConfig = {
   components: ['./components/**/*.catalogue.tsx'],
-  rootLayout: 'DashboardGrid',
-  categoryOrder: ['Layout', 'Charts', 'Data', 'Typography', 'Actions', 'Forms'],
+  categoryOrder: ['Layout', 'Typography', 'Actions', 'Forms', 'Data', 'Charts', 'UI'],
+  alias: { '@/': './' },
+  css: ['./app.css'],
+  jsonRender: {
+    catalog: { path: './lib/render/catalog.ts', exportName: 'dashboardCatalog' },
+    registry: { path: './lib/render/registry.tsx', exportName: 'registry' },
+  },
+  initialState: {
+    metrics: {
+      totalRevenue: 48520,
+      totalCustomers: 1243,
+      activeSubscriptions: 876,
+      churnRate: 2.4,
+      growthPercent: 12.5,
+      mrr: 38750,
+    },
+    revenueChart: {
+      title: 'Monthly Revenue',
+      data: 'Jan:32000,Feb:35000,Mar:33500,Apr:38000,May:41200,Jun:48520',
+    },
+    user: { name: 'Ahmed', role: 'Admin', email: 'ahmed@coralstack.com' },
+    // ... more sample data for customers, invoices, alerts, etc.
+  },
 }
 
 export default config
 ```
+
+The `initialState` provides sample dashboard data that components can bind to via expressions like `{ "$path": "/metrics/totalRevenue" }`. This state is available immediately when the editor loads — no need to manually enter it in the Page State panel.
 
 ## Custom Components
 

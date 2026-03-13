@@ -17,18 +17,47 @@ This example demonstrates building a marketing landing page using only UIBuilder
    npm install @coralstack/uibuilder --save-dev react react-dom zod
    ```
 
-2. **Create minimal config**
+2. **Create config with initial state**
 
    ```typescript
    // .uibuilder/config.ts
    import type { UIBuilderConfig } from '@coralstack/uibuilder'
 
    const config: UIBuilderConfig = {
-     components: [],
+     components: ['./components/**/*.catalogue.tsx'],
+     rootComponent: 'PageLayout',
+     categoryOrder: ['Layout', 'Navigation', 'Hero', 'Content', 'Actions'],
+     initialState: {
+       brand: {
+         name: 'CoralStack',
+         tagline: 'Ship faster with visual building blocks',
+         copyright: '© 2026 CoralStack Inc. All rights reserved.',
+       },
+       hero: {
+         headline: 'Build beautiful interfaces without writing code',
+         subtitle: 'Drag, drop, and customize production-ready components.',
+         ctaText: 'Start Building Free',
+         ctaUrl: '#signup',
+       },
+       features: [
+         { icon: '⚡', title: 'Lightning Fast', description: 'Instant previews.' },
+         { icon: '🎨', title: 'Design Tokens', description: 'Centralized styles.' },
+         { icon: '🔌', title: 'Plugin Ready', description: 'Bring your own components.' },
+       ],
+       pricing: {
+         tiers: [
+           { tier: 'Starter', price: '$0', period: '/month', highlighted: false },
+           { tier: 'Pro', price: '$29', period: '/month', highlighted: true },
+           { tier: 'Enterprise', price: '$99', period: '/month', highlighted: false },
+         ],
+       },
+     },
    }
 
    export default config
    ```
+
+   The `initialState` provides sample page data. Components can bind to values like `{ "$path": "/brand/name" }` or `{ "$each": "/features" }` to display dynamic content.
 
 3. **Run**
 
