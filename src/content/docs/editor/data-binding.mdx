@@ -1,13 +1,28 @@
 ---
 title: Data Binding
-description: Connect component props to a shared page state using $path expressions
+description: Connect component props to a shared page state using binding expressions
 sidebar:
   order: 4
 ---
 
 import { Aside, Steps, Tabs, TabItem } from '@astrojs/starlight/components';
 
-UIBuilder supports **data binding** — connecting component props to a shared page state model using `$path` expressions. This lets you design pages with dynamic, data-driven content instead of only static values.
+UIBuilder supports a rich **data binding** system — connecting component props to a shared page state model using expression objects. This lets you design pages with dynamic, data-driven content instead of only static values.
+
+## Expression Types
+
+UIBuilder supports eight binding expression types:
+
+| Expression | Purpose | Example |
+|------------|---------|---------|
+| [`$path`](#path-expressions) | Read a value from state | `{ "$path": "/user/name" }` |
+| [`$cond`](#cond-conditional) | Conditional (ternary) logic | `{ "$cond": { "test": ..., "then": ..., "else": ... } }` |
+| [`$eq`](#eq-equality) | Equality comparison | `{ "$eq": [{ "$path": "/status" }, "active"] }` |
+| [`$each`](#each-list-rendering) | Iterate over arrays | `{ "$each": "/items", "itemTemplate": { ... } }` |
+| [`$computed`](#computed-expressions) | Evaluate JS expressions | `{ "$computed": "revenue * 1.1" }` |
+| [`$bind`](#bind-two-way-binding) | Two-way data binding | `{ "$bind": "/form/email" }` |
+| [`$fetch`](#fetch-api-data) | Fetch data from APIs | `{ "$fetch": "https://api.example.com/data" }` |
+| [`$transform`](#transform-pipes) | Transform/format values | `{ "$transform": { "$path": "/price" }, "pipes": [...] }` |
 
 ## How It Works
 
@@ -27,19 +42,11 @@ Page State                    Component Props
 └─────────────────────┘
 ```
 
-A `$path` expression is a plain object with a single key:
-
-```json
-{ "$path": "/user/name" }
-```
-
-The path follows [JSON Pointer](https://datatracker.ietf.org/doc/html/rfc6901) syntax — segments separated by `/`, starting from the root of the state model.
-
 ## Quick Start
 
 <Steps>
 
-1. **Define page state** — Open the **Page State** panel in the right sidebar (below the properties panel). Enter sample data as JSON:
+1. **Define page state** — Open the **Page State** panel by clicking the state icon in the right sidebar nav. Enter sample data as JSON:
 
    ```json
    {
@@ -64,9 +71,32 @@ The path follows [JSON Pointer](https://datatracker.ietf.org/doc/html/rfc6901) s
 
 </Steps>
 
+## Initial State via Config
+
+You can pre-populate page state in your `.uibuilder/config.ts` using the `initialState` option:
+
+```typescript
+const config: UIBuilderConfig = {
+  components: ['./components/**/*.catalogue.tsx'],
+  initialState: {
+    user: { name: 'Jane Doe', role: 'Admin' },
+    metrics: { revenue: 12500, users: 342 },
+  },
+}
+```
+
+When `initialState` is defined:
+- New documents start with this state pre-populated
+- Components can bind to state paths immediately
+- Changes to `initialState` in the config file **hot-reload** without restarting the dev server
+
+<Aside type="tip">
+Initial state is especially useful for example projects and prototyping — components can reference data from the moment the editor loads.
+</Aside>
+
 ## Page State Panel
 
-The **Page State** panel is a collapsible section below the properties panel in the right sidebar. It provides a JSON textarea where you define sample data for your page.
+The **Page State** panel is accessible via the state icon in the right sidebar nav (alongside Properties and History). It provides a JSON textarea where you define sample data for your page.
 
 - **Apply button** — Changes are applied explicitly (not on every keystroke) to avoid parse errors while typing
 - **Validation** — Invalid JSON shows an error message below the textarea
@@ -98,9 +128,19 @@ Click the link icon again to switch back to static mode. The prop reverts to the
 Grid layout props (Column Span, Row Span, Grid Column, Grid Row) do not show the binding toggle — these are internal editor props that should not be data-bound.
 </Aside>
 
-## Path Format
+---
 
-Paths use JSON Pointer syntax:
+## `$path` Expressions
+
+The simplest binding — reads a value from the page state model using a JSON Pointer path.
+
+```json
+{ "$path": "/user/name" }
+```
+
+### Path Format
+
+Paths use [JSON Pointer](https://datatracker.ietf.org/doc/html/rfc6901) syntax:
 
 | Path | Resolves to |
 |------|-------------|
@@ -111,9 +151,271 @@ Paths use JSON Pointer syntax:
 
 Paths must point to **leaf values** (strings, numbers, booleans, or arrays). Pointing to an intermediate object (e.g. `/user`) will stringify the object for display.
 
+### String Interpolation
+
+You can embed `$path` expressions inside strings using template syntax:
+
+```
+"Hello, ${$path:/user/name}! You have ${$path:/metrics/count} items."
+```
+
+This resolves to: `"Hello, Jane Doe! You have 42 items."`
+
+If the entire string is a single `${$path:...}` expression, the raw type is preserved (not stringified).
+
+---
+
+## `$cond` (Conditional)
+
+Works like a ternary operator: evaluates `test`, returns `then` if truthy or `else` if falsy. All branches can themselves be binding expressions.
+
+```json
+{
+  "$cond": {
+    "test": { "$path": "/user/isAdmin" },
+    "then": "Welcome, admin!",
+    "else": "Welcome, user!"
+  }
+}
+```
+
+### Nested Conditions
+
+Combine with `$eq` for complex logic:
+
+```json
+{
+  "$cond": {
+    "test": { "$eq": [{ "$path": "/status" }, "active"] },
+    "then": "primary",
+    "else": "secondary"
+  }
+}
+```
+
+---
+
+## `$eq` (Equality)
+
+Compares two values for strict equality. Both operands can be binding expressions.
+
+```json
+{ "$eq": [{ "$path": "/status" }, "active"] }
+```
+
+Returns `true` or `false`. Commonly used inside `$cond` tests.
+
+---
+
+## `$each` (List Rendering)
+
+Maps over an array in state to produce repeated elements. The source can be a `$path` reference to an array or a literal array.
+
+```json
+{
+  "$each": "/users",
+  "itemTemplate": {
+    "name": { "$item": "name" },
+    "email": { "$item": "email" },
+    "index": { "$index": "" }
+  },
+  "keyPath": "id"
+}
+```
+
+### Template Placeholders
+
+| Placeholder | Description |
+|-------------|-------------|
+| `{ "$item": "" }` | The raw current array element |
+| `{ "$item": "field" }` | A dot-path field on the current element (e.g. `"address.city"`) |
+| `{ "$index": "" }` | The current array index (0-based) |
+
+### With Literal Array
+
+```json
+{
+  "$each": ["apple", "banana", "cherry"],
+  "itemTemplate": {
+    "label": { "$item": "" }
+  }
+}
+```
+
+---
+
+## `$computed` Expressions
+
+Evaluates a simple JavaScript expression against the page state model. State keys become variables.
+
+```json
+{ "$computed": "revenue * 1.1" }
+```
+
+Given state `{ revenue: 48500 }`, this resolves to `53350`.
+
+### Examples
+
+```json
+{ "$computed": "firstName + ' ' + lastName" }
+{ "$computed": "items.length > 0 ? 'Has items' : 'Empty'" }
+{ "$computed": "Math.round(price * taxRate * 100) / 100" }
+```
+
+<Aside type="caution">
+Only simple expressions are supported — no assignments, loops, or function calls beyond built-in globals. The expression runs in a sandboxed `Function()` scope.
+</Aside>
+
+---
+
+## `$bind` (Two-Way Binding)
+
+Automatically syncs a form input component with a state value — reading from state for the value prop and writing back on change.
+
+```json
+{ "$bind": "/form/email" }
+```
+
+### Options
+
+| Property | Type | Description |
+|----------|------|-------------|
+| `$bind` | `string` | JSON Pointer path to bind to (read AND write) |
+| `event` | `string` | Event name for write-back (default: `'onChange'`) |
+| `transform` | `'string' \| 'number' \| 'boolean'` | Type transform when reading |
+
+### Example with Transform
+
+```json
+{
+  "$bind": "/settings/fontSize",
+  "transform": "number"
+}
+```
+
+This reads the value as a number and writes changes back to `/settings/fontSize`.
+
+---
+
+## `$fetch` (API Data)
+
+Declares an API call whose result feeds into a component prop. Since fetching is async, the synchronous resolver returns the `fallback` value; the runtime is responsible for the actual fetch.
+
+```json
+{
+  "$fetch": "https://api.example.com/users/${$path:/userId}",
+  "method": "GET",
+  "responsePath": "data.items",
+  "fallback": [],
+  "cacheDuration": 60000
+}
+```
+
+### Options
+
+| Property | Type | Default | Description |
+|----------|------|---------|-------------|
+| `$fetch` | `string` | — | URL (supports `${$path:...}` interpolation) |
+| `method` | `'GET' \| 'POST' \| 'PUT' \| 'DELETE'` | `'GET'` | HTTP method |
+| `headers` | `Record<string, string>` | — | Request headers |
+| `body` | `unknown` | — | Request body (for POST/PUT) |
+| `responsePath` | `string` | — | Dot-notation path to extract from response |
+| `fallback` | `unknown` | — | Value to use if fetch fails |
+| `cacheDuration` | `number` | `30000` | Cache duration in ms (0 = no cache) |
+
+---
+
+## `$transform` (Pipes)
+
+Applies a chain of transform operations to a source value. The source is resolved first (can be a `$path` or literal), then each pipe is applied in order.
+
+```json
+{
+  "$transform": { "$path": "/user/name" },
+  "pipes": [
+    { "op": "uppercase" },
+    { "op": "truncate", "args": [20] }
+  ]
+}
+```
+
+### Available Transforms
+
+#### String Operations
+
+| Transform | Description | Args |
+|-----------|-------------|------|
+| `uppercase` | Convert to uppercase | — |
+| `lowercase` | Convert to lowercase | — |
+| `capitalize` | Capitalize first letter | — |
+| `trim` | Remove leading/trailing whitespace | — |
+| `truncate` | Truncate with `...` | `[maxLength]` |
+| `replace` | String replace | `[search, replacement]` |
+| `split` | Split into array | `[separator]` |
+
+#### Number Operations
+
+| Transform | Description | Args |
+|-----------|-------------|------|
+| `round` | `Math.round` | — |
+| `floor` | `Math.floor` | — |
+| `ceil` | `Math.ceil` | — |
+| `abs` | `Math.abs` | — |
+| `toFixed` | Fixed decimal places | `[precision]` |
+| `numberFormat` | Locale number formatting | `[locale?]` |
+
+#### Date & Array Operations
+
+| Transform | Description | Args |
+|-----------|-------------|------|
+| `dateFormat` | Locale date formatting | `[locale?, options?]` |
+| `join` | `Array.join` | `[separator]` |
+| `slice` | `Array/String.slice` | `[start, end?]` |
+| `default` | Fallback for null/undefined | `[fallback]` |
+
+### Chaining Example
+
+Format a currency value:
+
+```json
+{
+  "$transform": { "$path": "/metrics/revenue" },
+  "pipes": [
+    { "op": "numberFormat", "args": ["en-US"] },
+    { "op": "default", "args": ["$0"] }
+  ]
+}
+```
+
+---
+
+## `$handler` (Event Handlers)
+
+Defines actions to execute when an event fires. Used for interactive components in preview/production.
+
+```json
+{
+  "$handler": [
+    { "type": "setState", "path": "/counter", "value": 0 },
+    { "type": "navigate", "pageIndex": 2 }
+  ]
+}
+```
+
+### Action Types
+
+| Action | Description | Properties |
+|--------|-------------|------------|
+| `setState` | Set a value in state | `path`, `value` |
+| `toggleState` | Toggle a boolean | `path` |
+| `incrementState` | Increment a number | `path`, `amount` (default: 1) |
+| `navigate` | Navigate to a page | `pageIndex` |
+
+---
+
 ## Design-Time Resolution
 
-On the editor canvas, `$path` bindings are resolved in real-time against the page state. This means:
+On the editor canvas, binding expressions are resolved in real-time against the page state. This means:
 
 - Changing the state and clicking Apply immediately updates all bound components
 - Components display actual data values, not placeholder expressions
@@ -123,11 +425,11 @@ On the editor canvas, `$path` bindings are resolved in real-time against the pag
 
 ### Preview
 
-The preview overlay passes the page state as `initialState` to `@json-render/react`'s `JSONUIProvider`. This means `$path` expressions are resolved by the production renderer, giving you an accurate preview of how the page will look with real data.
+The preview overlay passes the page state as `initialState` to `@json-render/react`'s `JSONUIProvider`. This means all binding expressions are resolved by the production renderer, giving you an accurate preview.
 
 ### Export
 
-When exporting the page spec, `$path` expressions are preserved as-is in the component props, and the state model is included in the spec:
+When exporting the page spec, binding expressions are preserved as-is in the component props, and the state model is included in the spec:
 
 ```json
 {
@@ -166,7 +468,7 @@ import { Renderer, JSONUIProvider } from '@json-render/react'
 
 ## Utility Functions
 
-UIBuilder exports utility functions for working with `$path` expressions programmatically:
+UIBuilder exports utility functions for working with binding expressions programmatically:
 
 ```typescript
 import {
@@ -174,14 +476,20 @@ import {
   createPathExpression,
   resolveBindingValue,
   enumerateStatePaths,
+  isCondExpression,
+  createCondExpression,
+  isEqExpression,
+  createEqExpression,
+  isEachExpression,
+  createEachExpression,
+  isComputedExpression,
+  isBindExpression,
+  createBindExpression,
+  isFetchExpression,
+  createFetchExpression,
+  isTransformExpression,
+  createTransformExpression,
 } from '@coralstack/uibuilder'
 ```
-
-| Function | Description |
-|----------|-------------|
-| `isPathExpression(value)` | Returns `true` if the value is a `{ $path: string }` object |
-| `createPathExpression(path)` | Creates a `{ $path: "/..." }` object |
-| `resolveBindingValue(value, state)` | Resolves a single value against a state model |
-| `enumerateStatePaths(state)` | Lists all leaf paths with type and preview info |
 
 See the [API Reference](/reference/api-reference/) for full type signatures.

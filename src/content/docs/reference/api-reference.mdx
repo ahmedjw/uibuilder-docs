@@ -5,7 +5,7 @@ description: Exported functions and types from @coralstack/uibuilder
 
 Everything you can import from `@coralstack/uibuilder`.
 
-## Functions
+## Component Functions
 
 ### `defineComponent(options)`
 
@@ -59,64 +59,65 @@ const styles = buildCommonStyles({
 
 **Returns:** `React.CSSProperties`
 
-### `isPathExpression(value)`
+## Data Binding Functions
+
+### `$path` — Path Expressions
+
+#### `isPathExpression(value)`
 
 Checks whether a value is a `$path` binding expression.
 
 ```typescript
-import { isPathExpression } from '@coralstack/uibuilder'
-
 isPathExpression({ $path: '/user/name' }) // true
 isPathExpression('hello')                 // false
-isPathExpression({ foo: 'bar' })          // false
 ```
-
-**Parameters:** `value: unknown`
 
 **Returns:** `boolean`
 
-### `createPathExpression(path)`
+#### `createPathExpression(path)`
 
 Creates a `$path` binding expression object.
 
 ```typescript
-import { createPathExpression } from '@coralstack/uibuilder'
-
-const binding = createPathExpression('/user/name')
+createPathExpression('/user/name')
 // → { $path: '/user/name' }
 ```
 
-**Parameters:** `path: string` — JSON Pointer path (e.g. `"/user/name"`)
-
 **Returns:** `PathExpression`
 
-### `resolveBindingValue(value, stateModel)`
+#### `resolveBindingValue(value, stateModel)`
 
-Resolves a single value against a state model. If the value is a `$path` expression, looks up the path in state. Otherwise returns the value as-is.
+Resolves a single value against a state model. Handles all expression types (`$path`, `$cond`, `$eq`, `$each`, `$computed`, `$bind`, `$fetch`, `$transform`).
 
 ```typescript
-import { resolveBindingValue } from '@coralstack/uibuilder'
-
 const state = { user: { name: 'Jane' } }
 resolveBindingValue({ $path: '/user/name' }, state) // 'Jane'
 resolveBindingValue('static text', state)            // 'static text'
 ```
 
-**Parameters:**
-- `value: unknown` — The value to resolve (may be a `$path` expression or a literal)
-- `stateModel: Record<string, unknown>` — The page state model
+**Returns:** `unknown`
 
-**Returns:** `unknown` — The resolved value, or `undefined` if the path doesn't exist
+#### `resolveBindingsForDesignTime(props, stateModel)`
 
-### `enumerateStatePaths(obj, prefix?)`
+Resolves all binding expressions in a props object for design-time display.
+
+```typescript
+resolveBindingsForDesignTime(
+  { text: { $path: '/user/name' }, level: 'h1' },
+  { user: { name: 'Jane' } }
+)
+// → { text: 'Jane', level: 'h1' }
+```
+
+**Returns:** `Record<string, unknown>`
+
+#### `enumerateStatePaths(obj, prefix?)`
 
 Lists all leaf paths in a state model for use in path picker UIs.
 
 ```typescript
-import { enumerateStatePaths } from '@coralstack/uibuilder'
-
 const state = { user: { name: 'Jane', age: 30 }, items: [1, 2] }
-const paths = enumerateStatePaths(state)
+enumerateStatePaths(state)
 // [
 //   { path: '/user/name', type: 'string', preview: '"Jane"' },
 //   { path: '/user/age', type: 'number', preview: '30' },
@@ -124,11 +125,208 @@ const paths = enumerateStatePaths(state)
 // ]
 ```
 
-**Parameters:**
-- `obj: unknown` — The state model object
-- `prefix?: string` — Path prefix for recursion (default `""`)
-
 **Returns:** `StatePathEntry[]`
+
+#### `resolveStringInterpolation(template, stateModel)`
+
+Resolves `${$path:...}` template expressions inside strings.
+
+```typescript
+resolveStringInterpolation(
+  'Hello, ${$path:/user/name}!',
+  { user: { name: 'Jane' } }
+)
+// → 'Hello, Jane!'
+```
+
+**Returns:** `unknown`
+
+### `$cond` — Conditional Expressions
+
+#### `isCondExpression(value)`
+
+Checks whether a value is a `$cond` conditional expression.
+
+**Returns:** `boolean`
+
+#### `createCondExpression(test, thenValue, elseValue)`
+
+Creates a `$cond` expression.
+
+```typescript
+createCondExpression({ $path: '/isAdmin' }, 'admin', 'user')
+// → { $cond: { test: { $path: '/isAdmin' }, then: 'admin', else: 'user' } }
+```
+
+**Returns:** `CondExpression`
+
+### `$eq` — Equality Expressions
+
+#### `isEqExpression(value)`
+
+Checks whether a value is a `$eq` equality expression.
+
+**Returns:** `boolean`
+
+#### `createEqExpression(left, right)`
+
+Creates a `$eq` expression.
+
+```typescript
+createEqExpression({ $path: '/status' }, 'active')
+// → { $eq: [{ $path: '/status' }, 'active'] }
+```
+
+**Returns:** `EqExpression`
+
+### `$each` — List Expressions
+
+#### `isEachExpression(value)`
+
+Checks whether a value is a `$each` list expression.
+
+**Returns:** `boolean`
+
+#### `createEachExpression(source, itemTemplate?, keyPath?)`
+
+Creates a `$each` expression.
+
+```typescript
+createEachExpression('/items', { name: { $item: 'name' } }, 'id')
+```
+
+**Returns:** `EachExpression`
+
+#### `resolveEachExpression(expr, stateModel)`
+
+Resolves a `$each` expression against state. Returns an array of resolved items.
+
+**Returns:** `unknown[]`
+
+### `$computed` — Computed Expressions
+
+#### `isComputedExpression(value)`
+
+Checks whether a value is a `$computed` expression.
+
+**Returns:** `boolean`
+
+#### `resolveComputedValue(expression, stateModel)`
+
+Evaluates a JS expression with state keys as variables.
+
+```typescript
+resolveComputedValue('revenue * 1.1', { revenue: 48500 })
+// → 53350
+```
+
+**Returns:** `unknown`
+
+### `$bind` — Two-Way Binding
+
+#### `isBindExpression(value)`
+
+Checks whether a value is a `$bind` expression.
+
+**Returns:** `boolean`
+
+#### `createBindExpression(path, event?, transform?)`
+
+Creates a `$bind` expression.
+
+```typescript
+createBindExpression('/form/email', 'onChange', 'string')
+```
+
+**Returns:** `BindExpression`
+
+#### `resolveBindExpression(expr, stateModel, updateState)`
+
+Resolves a `$bind` expression. Returns `{ value, onChange }`.
+
+**Returns:** `{ value: unknown; onChange: (newValue: unknown) => void }`
+
+### `$handler` — Event Handlers
+
+#### `isHandlerExpression(value)`
+
+Checks whether a value is a `$handler` expression.
+
+**Returns:** `boolean`
+
+#### `createHandlerExpression(actions)`
+
+Creates a `$handler` expression.
+
+```typescript
+createHandlerExpression([
+  { type: 'setState', path: '/counter', value: 0 },
+  { type: 'navigate', pageIndex: 2 },
+])
+```
+
+**Returns:** `HandlerExpression`
+
+#### `resolveHandlerExpression(actions, stateModel, updateState, navigatePage?)`
+
+Resolves handler actions into a callback function.
+
+**Returns:** `() => void`
+
+### `$fetch` — API Fetch
+
+#### `isFetchExpression(value)`
+
+Checks whether a value is a `$fetch` expression.
+
+**Returns:** `boolean`
+
+#### `createFetchExpression(url, options?)`
+
+Creates a `$fetch` expression.
+
+```typescript
+createFetchExpression('https://api.example.com/data', {
+  method: 'GET',
+  fallback: [],
+  cacheDuration: 60000,
+})
+```
+
+**Returns:** `FetchExpression`
+
+#### `resolveFetchUrl(url, stateModel)`
+
+Resolves `${$path:...}` interpolations in a fetch URL.
+
+**Returns:** `string`
+
+### `$transform` — Transform Pipes
+
+#### `isTransformExpression(value)`
+
+Checks whether a value is a `$transform` expression.
+
+**Returns:** `boolean`
+
+#### `createTransformExpression(source, pipes)`
+
+Creates a `$transform` expression.
+
+```typescript
+createTransformExpression(
+  { $path: '/user/name' },
+  [{ op: 'uppercase' }, { op: 'truncate', args: [20] }]
+)
+```
+
+**Returns:** `TransformExpression`
+
+#### `applyTransforms(value, pipes)`
+
+Applies a chain of transform operations to a value.
+
+**Returns:** `unknown`
 
 ## Types
 
@@ -136,20 +334,126 @@ const paths = enumerateStatePaths(state)
 
 ```typescript
 interface PathExpression {
-  /** JSON Pointer path into the state model (e.g. "/user/name"). */
   $path: string
 }
+```
+
+### `CondExpression`
+
+```typescript
+interface CondExpression {
+  $cond: {
+    test: unknown
+    then: unknown
+    else: unknown
+  }
+}
+```
+
+### `EqExpression`
+
+```typescript
+interface EqExpression {
+  $eq: [unknown, unknown]
+}
+```
+
+### `EachExpression`
+
+```typescript
+interface EachExpression {
+  $each: string | unknown[]
+  itemTemplate?: Record<string, unknown>
+  keyPath?: string
+}
+```
+
+### `ComputedExpression`
+
+```typescript
+interface ComputedExpression {
+  $computed: string
+}
+```
+
+### `BindExpression`
+
+```typescript
+interface BindExpression {
+  $bind: string
+  event?: string
+  transform?: 'string' | 'number' | 'boolean'
+}
+```
+
+### `HandlerExpression`
+
+```typescript
+interface HandlerExpression {
+  $handler: HandlerAction[]
+}
+```
+
+### `HandlerAction`
+
+```typescript
+interface HandlerAction {
+  type: 'setState' | 'toggleState' | 'incrementState' | 'navigate'
+  path?: string
+  value?: unknown
+  amount?: number
+  pageIndex?: number
+}
+```
+
+### `FetchExpression`
+
+```typescript
+interface FetchExpression {
+  $fetch: string
+  method?: 'GET' | 'POST' | 'PUT' | 'DELETE'
+  headers?: Record<string, string>
+  body?: unknown
+  responsePath?: string
+  fallback?: unknown
+  cacheDuration?: number
+}
+```
+
+### `TransformExpression`
+
+```typescript
+interface TransformExpression {
+  $transform: unknown
+  pipes: TransformPipe[]
+}
+```
+
+### `TransformPipe`
+
+```typescript
+interface TransformPipe {
+  op: TransformOperation
+  args?: unknown[]
+}
+```
+
+### `TransformOperation`
+
+```typescript
+type TransformOperation =
+  | 'uppercase' | 'lowercase' | 'capitalize' | 'trim'
+  | 'round' | 'floor' | 'ceil' | 'abs'
+  | 'toFixed' | 'dateFormat' | 'numberFormat'
+  | 'truncate' | 'default' | 'join' | 'split' | 'replace' | 'slice'
 ```
 
 ### `StatePathEntry`
 
 ```typescript
 interface StatePathEntry {
-  /** JSON Pointer path (e.g. "/user/name"). */
   path: string
-  /** The JS typeof the leaf value. */
   type: string
-  /** A short preview of the value (truncated for display). */
   preview: string
 }
 ```
@@ -159,14 +463,33 @@ interface StatePathEntry {
 ```typescript
 interface UIBuilderConfig {
   components: string[]
-  rootLayout?: string
+  projectId?: string
+  rootComponent?: string
   includeBuiltins?: boolean
+  gridColumns?: number
   categoryOrder?: string[]
+  alias?: Record<string, string>
+  css?: string[]
+  jsonRender?: {
+    catalog?: { path: string; exportName: string }
+    registry?: { path: string; exportName: string }
+  }
+  initialState?: Record<string, unknown>
+  outDir?: string
+  port?: number
   ai?: {
     apiKey?: string
     apiUrl?: string
     model?: string
   }
+  quickPrompts?: Array<{ label: string; prompt: string }>
+  typography?: {
+    fontFamily?: string
+    baseFontSize?: number
+    lineHeight?: number
+  }
+  spacingScale?: number[]
+  historyDepth?: number
 }
 ```
 
@@ -271,11 +594,8 @@ interface ComponentNode {
 
 ```typescript
 interface PageDocument {
-  /** The root component node of the page tree. */
   root: ComponentNode
-  /** Page-level metadata (title, timestamps, etc.). */
   metadata: PageMetadata
-  /** Page-level state model for $path data bindings. */
   state?: Record<string, unknown>
 }
 ```
