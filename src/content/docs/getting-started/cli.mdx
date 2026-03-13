@@ -58,16 +58,23 @@ When you run `uibuilder`, the CLI:
 
 The editor starts on port **6200**. If that port is in use, Vite automatically picks the next available port.
 
-## File Watching
+## File Watching & HMR
 
-The CLI watches for changes to `.catalogue.tsx` files:
+The CLI watches for changes to catalogue and config files:
+
+### Catalogue Files (`.catalogue.tsx`)
 
 - **New file added** → appears in the sidebar automatically
 - **File removed** → disappears from the sidebar
 - **File modified** → HMR updates the component in place
 
+### Config File (`.uibuilder/config.ts`)
+
+- **`initialState` changed** → page state hot-reloads without restarting the server
+- The virtual config module self-accepts HMR updates, so only the affected store updates re-render — no full page reload
+
 <Aside type="tip">
-You don't need to restart the server when adding or removing catalogue files. The virtual module plugin detects changes and triggers a hot reload.
+You don't need to restart the server when adding/removing catalogue files or editing `initialState` in the config. The virtual module plugin detects changes and triggers hot updates.
 </Aside>
 
 ## Environment Variables
